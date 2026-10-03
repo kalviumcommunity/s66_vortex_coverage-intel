@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check src tests scripts
+
+      - name: Format check
+        run: ruff format --check src tests scripts
+
+      - name: Types
+        run: mypy src
+
+      - name: Tests
+        run: pytest -q
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate internal doc links
+        run: |
+          python - <<'PY'
+          import pathlib, re, sys
+          root = pathlib.Path(".")
+          bad = []
+          for md in root.rglob("*.md"):
+              if ".git" in md.parts: continue
+              for m in re.finditer(r"\]\((?!https?://|#)([^)]+)\)", md.read_text()):
+                  target = (md.parent / m.group(1).split("#")[0]).resolve()
+                  if not target.exists():
+                      bad.append(f"{md}: {m.group(1)}")
+          print("\n".join(bad) if bad else "All internal links resolve.")
+          sys.exit(1 if bad else 0)
+          PY

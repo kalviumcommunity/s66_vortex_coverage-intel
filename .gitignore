@@ -1,0 +1,45 @@
+# Environment
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Corpus & generated data — policy documents are never committed
+data/corpus/*
+!data/corpus/.gitkeep
+data/chunks*.jsonl
+data/index/
+*.sqlite3
+*.db
+
+# Evaluation artifacts (may contain claim-derived content)
+evals/reports/
+
+# Knowledge bases
+.chroma/
+qdrant_storage/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+logs/
