@@ -20,8 +20,8 @@
 ## 2. Local Setup
 
 ```bash
-git clone https://github.com/sangeeth-606/coverage-intel.git
-cd coverage-intel
+git clone https://github.com/kalviumcommunity/s66_vortex_coverage-intel.git
+cd s66_vortex_coverage-intel
 
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"

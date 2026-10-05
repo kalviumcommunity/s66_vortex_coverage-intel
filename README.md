@@ -72,8 +72,8 @@ phase-by-phase against those specs.
 ## Quick Start
 
 ```bash
-git clone https://github.com/sangeeth-606/coverage-intel.git
-cd coverage-intel
+git clone https://github.com/kalviumcommunity/s66_vortex_coverage-intel.git
+cd s66_vortex_coverage-intel
 
 cp .env.example .env        # fill in your API keys
 make install                # python -m venv + pip install -e ".[dev]"
