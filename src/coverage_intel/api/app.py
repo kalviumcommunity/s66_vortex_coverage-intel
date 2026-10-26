@@ -5,12 +5,16 @@ Phase: phase-07-backend-api.md
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from ..config import get_settings
 from ..errors import CoverageIntelError
 from ..logging_config import configure_logging
+from ..pipeline.rag import answer_question
+from .schemas import AskRequest
 
 DESCRIPTION = """
 **Coverage Intel** — RAG-based insurance coverage intelligence assistant.
@@ -34,6 +38,15 @@ def create_app() -> FastAPI:
     @app.exception_handler(CoverageIntelError)
     async def _handle_known_error(_request: Request, exc: CoverageIntelError) -> JSONResponse:
         return _error_response(exc)
+
+    @app.post("/ask")
+    async def ask(request: AskRequest) -> object:
+        """Answer a coverage question through the RAG pipeline."""
+        return answer_question(
+            request.question,
+            request.scenario,
+            query_id=str(uuid4()),
+        )
 
     return app
 
