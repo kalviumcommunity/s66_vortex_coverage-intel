@@ -19,26 +19,24 @@ def retrieval_recall_at_k(expected: list[str], retrieved: list[str], k: int = 5)
     return len(top & set(expected)) / len(expected)
 
 
-def grounded_answer_rate(answers: list, unsupported_claims: list[str]) -> float:
+def grounded_answer_rate(answers: list[object], unsupported_claims: list[str]) -> float:
     """Share of grounded answers containing no unsupported claim."""
     grounded = [a for a in answers if getattr(a, "status", None) == "grounded"]
     if not grounded:
         return 0.0
     bad = {getattr(a, "query_id", None) for a in unsupported_claims}
-    return sum(1 for a in grounded if a.query_id not in bad) / len(grounded)
+    return sum(1 for a in grounded if getattr(a, "query_id", None) not in bad) / len(grounded)
 
 
-def uncertainty_handling(questions: list, answers: list) -> float:
+def uncertainty_handling(questions: list[dict[str, object]], answers: list[object]) -> float:
     """Share of insufficient/conflicting questions answered with a review response."""
-    relevant = [q for q in questions if q.get("category") in
-                ("insufficient_evidence", "version_conflict")]
+    relevant = [
+        q for q in questions if q.get("category") in ("insufficient_evidence", "version_conflict")
+    ]
     if not relevant:
         return 0.0
     by_id = {getattr(a, "query_id", None): getattr(a, "status", None) for a in answers}
-    return sum(
-        1 for q in relevant
-        if by_id.get(q["qid"]) not in ("grounded", None)
-    ) / len(relevant)
+    return sum(1 for q in relevant if by_id.get(q["qid"]) not in ("grounded", None)) / len(relevant)
 
 
 def percentile(values: list[float], p: float) -> float:

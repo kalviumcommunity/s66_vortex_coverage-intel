@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import Any
 
 import structlog
 
@@ -19,7 +20,7 @@ REDACTED_FIELDS = frozenset(
 
 def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
     """Configure structlog with redaction applied to every record."""
-    processors: list = [
+    processors: list[Any] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
@@ -27,9 +28,7 @@ def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
         structlog.processors.format_exc_info,
     ]
     processors.append(
-        structlog.processors.JSONRenderer()
-        if json_format
-        else structlog.dev.ConsoleRenderer()
+        structlog.processors.JSONRenderer() if json_format else structlog.dev.ConsoleRenderer()
     )
 
     structlog.configure(
@@ -42,6 +41,6 @@ def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
     )
 
 
-def redact(_logger: object, _name: str, event_dict: dict) -> dict:
+def redact(_logger: object, _name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Drop any field that could contain claim or personal data."""
     return {k: v for k, v in event_dict.items() if k not in REDACTED_FIELDS}

@@ -41,7 +41,7 @@ class RetrievedEvidence(BaseModel):
 def retrieve(
     question: str,
     k: int = 5,
-    filters: "object | None" = None,
+    filters: object | None = None,
     scenario: Scenario | None = None,
 ) -> list[RetrievedEvidence]:
     """Retrieve the top-k chunks with similarity scores and metadata."""

@@ -66,6 +66,7 @@ CONFLICT = """The retrieved sources conflict and precedence cannot be determined
 Present both positions with their citations, state that the conflict is \
 unresolved, and request human review. Do not select one source."""
 
+
 @dataclass(frozen=True, slots=True)
 class PromptTemplate:
     """A named, reusable prompt with checked format placeholders."""

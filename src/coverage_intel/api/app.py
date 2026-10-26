@@ -5,7 +5,8 @@ Phase: phase-07-backend-api.md
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from ..config import get_settings
 from ..errors import CoverageIntelError
@@ -31,16 +32,14 @@ def create_app() -> FastAPI:
     )
 
     @app.exception_handler(CoverageIntelError)
-    async def _handle_known_error(_request, exc: CoverageIntelError):
+    async def _handle_known_error(_request: Request, exc: CoverageIntelError) -> JSONResponse:
         return _error_response(exc)
 
     return app
 
 
-def _error_response(exc: CoverageIntelError) -> Any:
+def _error_response(exc: CoverageIntelError) -> JSONResponse:
     """Build the error envelope. Never includes a partial answer."""
-    from fastapi.responses import JSONResponse
-
     return JSONResponse(
         status_code=exc.http_status,
         content={

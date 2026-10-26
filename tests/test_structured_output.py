@@ -26,7 +26,9 @@ def _client(content: str) -> OpenAIChatClient:
 
     return OpenAIChatClient(
         Settings(llm_api_key="test-key", llm_model="test-model"),
-        http_client=httpx.Client(transport=httpx.MockTransport(handler), base_url="https://test.local/v1"),
+        http_client=httpx.Client(
+            transport=httpx.MockTransport(handler), base_url="https://test.local/v1"
+        ),
     )
 
 

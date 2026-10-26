@@ -33,6 +33,6 @@ class Citation(BaseModel):
     excerpt: str
 
 
-def build_citations(evidence: list, answer: dict) -> list[Citation]:
+def build_citations(evidence: list[object], answer: dict[str, object]) -> list[Citation]:
     """Build citations from the cited evidence blocks."""
     raise NotImplementedError("Implemented in phase-05-rag-core.md")

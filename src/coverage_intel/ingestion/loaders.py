@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 import re
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Literal, Protocol, cast
 
 from docx import Document
 from pydantic import BaseModel
@@ -72,7 +72,10 @@ def load(path: Path) -> ExtractedDocument:
     if char_count == 0:
         raise ExtractionError(f"No usable text extracted from {path.name}")
     return ExtractedDocument(
-        document_id=document_id, file_type=suffix, blocks=blocks, char_count=char_count
+        document_id=document_id,
+        file_type=cast(Literal["pdf", "docx", "txt"], suffix),
+        blocks=blocks,
+        char_count=char_count,
     )
 
 
@@ -92,9 +95,9 @@ def _load_pdf(path: Path) -> list[Block]:
 def _load_docx(path: Path) -> list[Block]:
     blocks: list[Block] = []
     section: str | None = None
-    for paragraph in Document(path).paragraphs:
+    for paragraph in Document(str(path)).paragraphs:
         text = paragraph.text.strip()
-        if paragraph.style.name.startswith("Heading") and text:
+        if paragraph.style is not None and paragraph.style.name.startswith("Heading") and text:
             section = text
         if text:
             blocks.append(Block(text=text, section=section))

@@ -8,7 +8,8 @@ Spec: specs/05-retrieval.md
 
 from __future__ import annotations
 
-from typing import Protocol, Sequence
+from collections.abc import Sequence
+from typing import Protocol
 
 from pydantic import BaseModel
 
@@ -28,7 +29,7 @@ class VectorStore(Protocol):
     def upsert(self, chunks: Sequence[Chunk], vectors: list[list[float]]) -> None: ...
 
     def search(
-        self, vector: list[float], k: int, filters: "object | None" = None
+        self, vector: list[float], k: int, filters: object | None = None
     ) -> list[ScoredChunk]: ...
 
     def delete_by_document(self, document_id: str) -> None: ...

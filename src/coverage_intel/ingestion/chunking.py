@@ -71,12 +71,8 @@ def chunk(
             text = encoding.decode(window).strip()
             if not text:
                 continue
-            pages = [
-                page for page in token_pages[start : start + config.size] if page is not None
-            ]
-            source_blocks = section_blocks_for_window(
-                section_blocks, start, config.size, encoding
-            )
+            pages = [page for page in token_pages[start : start + config.size] if page is not None]
+            source_blocks = section_blocks_for_window(section_blocks, start, config.size, encoding)
             char_start = next(
                 (block.char_start for block in source_blocks if block.char_start is not None), None
             )

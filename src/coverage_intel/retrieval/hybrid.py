@@ -1,6 +1,6 @@
 """Hybrid semantic + keyword retrieval — FR-09.
 
-``score_hybrid = α · score_dense + (1 − α) · score_sparse``  (α default 0.7)
+``score_hybrid = a * score_dense + (1 - a) * score_sparse``  (a default 0.7)
 Reciprocal Rank Fusion is the documented alternative when the score
 distributions are not comparable.
 

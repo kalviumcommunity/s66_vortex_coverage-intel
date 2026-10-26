@@ -48,7 +48,7 @@ class GuardrailResult(BaseModel):
     warnings: list[Warning] = []
 
 
-def evaluate(evidence: list, analysis: Any = None) -> GuardrailResult:
+def evaluate(evidence: list[object], analysis: Any = None) -> GuardrailResult:
     """Evaluate guardrails against retrieved evidence. First trigger wins.
 
     Triggers, in order:
@@ -61,7 +61,7 @@ def evaluate(evidence: list, analysis: Any = None) -> GuardrailResult:
     raise NotImplementedError("Implemented in phase-05-rag-core.md")
 
 
-def analyse(evidence: list, scenario: Any = None) -> Any:
+def analyse(evidence: list[object], scenario: Any = None) -> Any:
     """Applicability and conflict analysis — PRD §9.1.
 
     Precedence rule (provisional, awaiting confirmation — specs/09):

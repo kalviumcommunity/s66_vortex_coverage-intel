@@ -22,7 +22,7 @@ class AskRequest(BaseModel):
         description="Applicability context. date_of_loss drives version resolution.",
     )
     top_k: int = Field(default=5, ge=1, le=20)
-    filters: dict | None = None
+    filters: dict[str, object] | None = None
     conversation_id: str | None = None
 
 
