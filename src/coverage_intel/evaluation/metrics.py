@@ -10,6 +10,8 @@ E-7  cold starts excluded from p95 are reported separately.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 
 def retrieval_recall_at_k(expected: list[str], retrieved: list[str], k: int = 5) -> float:
     """Fraction of expected chunks present in the top-k retrieved results."""
@@ -46,3 +48,29 @@ def percentile(values: list[float], p: float) -> float:
     ordered = sorted(values)
     index = min(int(len(ordered) * p / 100), len(ordered) - 1)
     return ordered[index]
+
+
+def retrieval_precision_at_k(expected: list[str], retrieved: list[str], k: int = 5) -> float:
+    """Share of the top-k retrieved chunks that are relevant."""
+    if k < 1:
+        raise ValueError("k must be positive")
+    top = retrieved[:k]
+    return len(set(top) & set(expected)) / len(top) if top else 0.0
+
+
+def reciprocal_rank(expected: list[str], retrieved: list[str]) -> float:
+    """Return reciprocal rank of the first expected chunk."""
+    expected_set = set(expected)
+    for rank, chunk_id in enumerate(retrieved, 1):
+        if chunk_id in expected_set:
+            return 1 / rank
+    return 0.0
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalReport:
+    """Aggregate retrieval metrics for one evaluation slice."""
+
+    recall_at_k: float
+    precision_at_k: float
+    mean_reciprocal_rank: float
