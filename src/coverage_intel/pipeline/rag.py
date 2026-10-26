@@ -8,9 +8,21 @@ Spec: AGENTS.md §5 · Phase: phase-05
 
 from __future__ import annotations
 
-from ..retrieval.semantic import Scenario
+from collections.abc import Callable
+
+from ..generation.answer import CoverageAnswer, generate
+from ..generation.context import assemble
+from ..retrieval.semantic import RetrievedEvidence, Scenario
 
 
-def answer_question(question: str, scenario: Scenario | None = None) -> object:
+def answer_question(
+    question: str,
+    scenario: Scenario | None = None,
+    *,
+    retriever: Callable[[str, Scenario | None], list[RetrievedEvidence]] | None = None,
+    query_id: str = "local-query",
+) -> CoverageAnswer:
     """Run the full RAG pipeline and return a CoverageAnswer."""
-    raise NotImplementedError("Implemented in phase-05-rag-core.md")
+    evidence = retriever(question, scenario) if retriever else []
+    context = assemble(evidence)
+    return generate(question, context, query_id)
