@@ -6,12 +6,13 @@ The first implementation uses the OpenAI-compatible Chat Completions API via
 
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol, TypeVar
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from coverage_intel.config import Settings, get_settings
 from coverage_intel.errors import GenerationError
@@ -49,7 +50,17 @@ class LLMClient(Protocol):
         temperature: float = 0.2,
         max_tokens: int | None = None,
         stop: Sequence[str] | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> Completion: ...
+
+    def generate_structured(
+        self,
+        messages: Sequence[ChatMessage],
+        schema: type[T],
+        *,
+        temperature: float = 0.2,
+        max_tokens: int | None = None,
+    ) -> T: ...
 
 
 class OpenAIChatClient:
@@ -78,6 +89,7 @@ class OpenAIChatClient:
         temperature: float = 0.2,
         max_tokens: int | None = None,
         stop: Sequence[str] | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> Completion:
         """Send one completion request and translate provider failures."""
         try:
@@ -98,6 +110,8 @@ class OpenAIChatClient:
             payload["max_tokens"] = parameters.max_tokens
         if parameters.stop:
             payload["stop"] = list(parameters.stop)
+        if response_format is not None:
+            payload["response_format"] = response_format
 
         try:
             response = self._client.post(
@@ -124,6 +138,34 @@ class OpenAIChatClient:
             completion_tokens=int(usage.get("completion_tokens", 0)),
             total_tokens=int(usage.get("total_tokens", 0)),
         )
+
+    def generate_structured(
+        self,
+        messages: Sequence[ChatMessage],
+        schema: type[T],
+        *,
+        temperature: float = 0.2,
+        max_tokens: int | None = None,
+    ) -> T:
+        """Request JSON matching a Pydantic schema and validate the result."""
+        response_format = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": schema.__name__.lower(),
+                "strict": True,
+                "schema": schema.model_json_schema(),
+            },
+        }
+        completion = self.complete(
+            messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            response_format=response_format,
+        )
+        try:
+            return schema.model_validate(json.loads(completion.content))
+        except (json.JSONDecodeError, TypeError, ValidationError) as exc:
+            raise GenerationError(f"Structured LLM output failed validation: {exc}") from exc
 
     def close(self) -> None:
         """Close the underlying HTTP client when this instance owns it."""
