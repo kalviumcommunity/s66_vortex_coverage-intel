@@ -14,6 +14,7 @@ from datetime import date
 from pydantic import BaseModel
 
 from ..ingestion.metadata import SourceCategory
+from ..retrieval.semantic import RetrievedEvidence
 
 
 class Citation(BaseModel):
@@ -35,4 +36,36 @@ class Citation(BaseModel):
 
 def build_citations(evidence: list[object], answer: dict[str, object]) -> list[Citation]:
     """Build citations from the cited evidence blocks."""
-    raise NotImplementedError("Implemented in phase-05-rag-core.md")
+    statements = answer.get("statements", [])
+    cited_indices: set[int] = set()
+    if isinstance(statements, list):
+        for statement in statements:
+            if isinstance(statement, dict):
+                indices = statement.get("citation_indices", [])
+                if isinstance(indices, list):
+                    cited_indices.update(index for index in indices if isinstance(index, int))
+    selected = [
+        item for index, item in enumerate(evidence) if not cited_indices or index in cited_indices
+    ]
+    citations: list[Citation] = []
+    for citation_index, item in enumerate(selected, 1):
+        if not isinstance(item, RetrievedEvidence):
+            continue
+        chunk = item.chunk
+        citations.append(
+            Citation(
+                citation_index=citation_index,
+                chunk_id=chunk.chunk_id,
+                document_id=chunk.document_id,
+                document_title=chunk.document_id,
+                section=chunk.section,
+                page=chunk.page,
+                version=chunk.version,
+                effective_from=chunk.effective_from,
+                effective_to=chunk.effective_to,
+                jurisdiction=chunk.jurisdiction,
+                category=chunk.category,
+                excerpt=chunk.text,
+            )
+        )
+    return citations
