@@ -14,7 +14,7 @@ from ..config import get_settings
 from ..errors import CoverageIntelError
 from ..logging_config import configure_logging
 from ..pipeline.rag import answer_question
-from .schemas import AskRequest
+from .schemas import AskRequest, UploadAccepted, UploadMetadata
 
 DESCRIPTION = """
 **Coverage Intel** — RAG-based insurance coverage intelligence assistant.
@@ -46,6 +46,15 @@ def create_app() -> FastAPI:
             request.question,
             request.scenario,
             query_id=str(uuid4()),
+        )
+
+    @app.post("/documents", response_model=UploadAccepted, status_code=202)
+    async def register_document(metadata: UploadMetadata) -> UploadAccepted:
+        """Accept validated source metadata for asynchronous ingestion."""
+        document_id = metadata.document_id or str(uuid4())
+        return UploadAccepted(
+            document_id=document_id,
+            message="Document accepted for ingestion.",
         )
 
     return app
