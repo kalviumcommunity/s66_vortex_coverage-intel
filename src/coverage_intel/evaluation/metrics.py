@@ -74,3 +74,17 @@ class RetrievalReport:
     recall_at_k: float
     precision_at_k: float
     mean_reciprocal_rank: float
+
+
+def build_retrieval_report(cases: list[tuple[list[str], list[str]]], k: int = 5) -> RetrievalReport:
+    """Aggregate recall, precision, and reciprocal rank across test cases."""
+    if not cases:
+        return RetrievalReport(0.0, 0.0, 0.0)
+    recalls = [retrieval_recall_at_k(expected, actual, k) for expected, actual in cases]
+    precisions = [retrieval_precision_at_k(expected, actual, k) for expected, actual in cases]
+    ranks = [reciprocal_rank(expected, actual) for expected, actual in cases]
+    return RetrievalReport(
+        recall_at_k=sum(recalls) / len(recalls),
+        precision_at_k=sum(precisions) / len(precisions),
+        mean_reciprocal_rank=sum(ranks) / len(ranks),
+    )
