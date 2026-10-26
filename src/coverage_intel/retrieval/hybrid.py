@@ -21,4 +21,28 @@ def fuse(
     k: int = 5,
 ) -> list[RetrievedEvidence]:
     """Fuse dense and sparse results into one ranked list."""
-    raise NotImplementedError("Implemented in phase-03-embeddings-and-vector-db.md")
+    if not 0 <= alpha <= 1:
+        raise ValueError("alpha must be between 0 and 1")
+    if k < 1:
+        raise ValueError("k must be positive")
+    by_chunk: dict[str, RetrievedEvidence] = {}
+    for evidence in semantic:
+        by_chunk[evidence.chunk.chunk_id] = evidence.model_copy(
+            update={"keyword_score": evidence.keyword_score or 0.0}
+        )
+    for evidence in keyword:
+        current = by_chunk.get(evidence.chunk.chunk_id, evidence)
+        by_chunk[evidence.chunk.chunk_id] = current.model_copy(
+            update={"keyword_score": evidence.semantic_score}
+        )
+    fused = [
+        evidence.model_copy(
+            update={
+                "hybrid_score": alpha * evidence.semantic_score
+                + (1 - alpha) * (evidence.keyword_score or 0.0)
+            }
+        )
+        for evidence in by_chunk.values()
+    ]
+    fused.sort(key=lambda item: item.hybrid_score, reverse=True)
+    return [item.model_copy(update={"rank": rank}) for rank, item in enumerate(fused[:k], 1)]
