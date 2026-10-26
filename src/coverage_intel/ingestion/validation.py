@@ -58,7 +58,9 @@ def prepare_corpus(
             if not cleaned:
                 raise ExtractionError(f"No usable text remains after cleaning: {path.name}")
             char_count = sum(len(block.text) for block in cleaned)
-            prepared.append(document.model_copy(update={"blocks": cleaned, "char_count": char_count}))
+            prepared.append(
+                document.model_copy(update={"blocks": cleaned, "char_count": char_count})
+            )
         except CoverageIntelError as exc:
             failures.append(
                 ValidationFailure(path=str(path), code=exc.error_code, message=str(exc))
