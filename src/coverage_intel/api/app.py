@@ -57,6 +57,11 @@ def create_app() -> FastAPI:
             message="Document accepted for ingestion.",
         )
 
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        """Report process health without making external provider calls."""
+        return {"status": "ok", "service": "coverage-intel"}
+
     return app
 
 
