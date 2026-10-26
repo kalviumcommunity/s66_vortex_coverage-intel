@@ -17,7 +17,7 @@ from pydantic import BaseModel, model_validator
 from ..retrieval.semantic import RetrievedEvidence
 from .citations import Citation
 from .context import Context
-from .guardrails import Warning
+from .guardrails import Warning, WarningKind
 
 
 class AnswerStatus(StrEnum):
@@ -67,14 +67,14 @@ class CoverageAnswer(BaseModel):
                 object.__setattr__(
                     self,
                     "warnings",
-                    self.warnings
-                    + [
+                    [
+                        *self.warnings,
                         Warning(
-                            kind="review_required",
+                            kind=WarningKind.REVIEW_REQUIRED,
                             severity="warning",
                             message="One or more statements lacked resolvable citations; "
                             "answer downgraded to requiring review.",
-                        )
+                        ),
                     ],
                 )
                 break

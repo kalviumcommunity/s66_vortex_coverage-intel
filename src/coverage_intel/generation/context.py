@@ -23,8 +23,6 @@ class Context(BaseModel):
     truncated: bool = False
 
 
-def assemble(
-    evidence: list[RetrievedEvidence], budget: int | None = None
-) -> Context:
+def assemble(evidence: list[RetrievedEvidence], budget: int | None = None) -> Context:
     """Assemble a bounded context from selected evidence."""
     raise NotImplementedError("Implemented in phase-05-rag-core.md")

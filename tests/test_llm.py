@@ -41,7 +41,8 @@ def test_provider_error_becomes_generation_error() -> None:
     transport = httpx.MockTransport(lambda _: httpx.Response(429, json={"error": "rate limited"}))
     with (
         OpenAIChatClient(
-            _settings(), http_client=httpx.Client(transport=transport, base_url="https://test.local/v1")
+            _settings(),
+            http_client=httpx.Client(transport=transport, base_url="https://test.local/v1"),
         ) as client,
         pytest.raises(GenerationError, match="LLM completion failed"),
     ):

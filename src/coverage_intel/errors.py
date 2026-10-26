@@ -30,7 +30,7 @@ class GenerationError(CoverageIntelError):
     retryable = True
 
 
-class UnsupportedDocumentType(CoverageIntelError):
+class UnsupportedDocumentType(CoverageIntelError):  # noqa: N818 - public error code name
     """File is not PDF, DOCX, or TXT."""
 
     http_status = 415
@@ -44,7 +44,7 @@ class CorpusValidationError(CoverageIntelError):
     error_code = "CorpusValidationError"
 
 
-class UnauthorizedUpload(CoverageIntelError):
+class UnauthorizedUpload(CoverageIntelError):  # noqa: N818 - public error code name
     """Missing or invalid upload access key (FR-16)."""
 
     http_status = 401

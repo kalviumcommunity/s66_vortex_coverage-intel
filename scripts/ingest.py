@@ -10,7 +10,9 @@ import argparse
 
 def main() -> int:
     """Parse, clean, and chunk approved documents from the corpus directory."""
-    parser = argparse.ArgumentParser(description="Parse, clean, and chunk approved documents from the corpus directory.")
+    parser = argparse.ArgumentParser(
+        description="Parse, clean, and chunk approved documents from the corpus directory."
+    )
     parser.parse_args()
     raise SystemExit(
         "Not yet implemented — see phases/phase-02-ingestion.md\n"

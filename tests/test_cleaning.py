@@ -24,9 +24,7 @@ def test_clean_removes_repeated_boilerplate_and_page_numbers() -> None:
 
 def test_clean_preserves_policy_language_and_normalizes_bullets() -> None:
     blocks = [
-        Block(
-            text='• Section 7.2: "Loss" means direct damage.\nThe policy does not cover flood.'
-        )
+        Block(text='• Section 7.2: "Loss" means direct damage.\nThe policy does not cover flood.')
     ]
 
     result = clean(blocks)

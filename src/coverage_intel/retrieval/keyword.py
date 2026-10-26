@@ -12,6 +12,6 @@ from __future__ import annotations
 class KeywordIndex:
     """BM25 index over chunk text."""
 
-    def search(self, query: str, k: int, filters: "object | None" = None):
+    def search(self, query: str, k: int, filters: object | None = None) -> list[object]:
         """Return the top-k chunks by BM25 score."""
         raise NotImplementedError("Implemented in phase-03-embeddings-and-vector-db.md")
