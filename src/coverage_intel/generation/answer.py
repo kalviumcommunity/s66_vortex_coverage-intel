@@ -83,4 +83,22 @@ class CoverageAnswer(BaseModel):
 
 def generate(question: str, context: Context, query_id: str) -> CoverageAnswer:
     """Generate a grounded answer constrained to retrieved evidence."""
-    raise NotImplementedError("Implemented in phase-05-rag-core.md")
+    now = datetime.now()
+    if not context.blocks:
+        return CoverageAnswer(
+            query_id=query_id,
+            question=question,
+            status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+            summary="Insufficient evidence was retrieved to answer this question.",
+            generated_at=now,
+        )
+    summary = context.blocks[0].chunk.text
+    return CoverageAnswer(
+        query_id=query_id,
+        question=question,
+        status=AnswerStatus.WEAK_EVIDENCE,
+        summary=summary,
+        statements=[AnswerStatement(text=summary)],
+        evidence=context.blocks,
+        generated_at=now,
+    )
