@@ -23,6 +23,12 @@ def answer_question(
     query_id: str = "local-query",
 ) -> CoverageAnswer:
     """Run the full RAG pipeline and return a CoverageAnswer."""
-    evidence = retriever(question, scenario) if retriever else []
+    if retriever:
+        evidence = retriever(question, scenario)
+    else:
+        from ..retrieval.semantic import retrieve
+
+        evidence = retrieve(question, scenario=scenario)
     context = assemble(evidence)
     return generate(question, context, query_id)
+

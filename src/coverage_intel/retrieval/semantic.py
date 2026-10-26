@@ -68,4 +68,35 @@ def retrieve(
     scenario: Scenario | None = None,
 ) -> list[RetrievedEvidence]:
     """Retrieve the top-k chunks with similarity scores and metadata."""
-    raise NotImplementedError("Implemented in phase-03-embeddings-and-vector-db.md")
+    from ..embeddings.encoder import get_embedder
+    from ..vectorstore.index import get_vector_store
+
+    store = get_vector_store()
+    if store.count == 0:
+        return []
+    embedder = get_embedder()
+    try:
+        query_vector = embedder.embed_query(question)
+    except Exception:
+        return []
+
+    filter_dict: dict[str, object] = {}
+    if isinstance(filters, dict):
+        filter_dict.update(filters)
+    if scenario:
+        if scenario.jurisdiction:
+            filter_dict["jurisdiction"] = scenario.jurisdiction
+        if scenario.policy_type:
+            filter_dict["policy_type"] = scenario.policy_type
+
+    results = store.search(query_vector, k=k, filters=filter_dict if filter_dict else None)
+    return [
+        RetrievedEvidence(
+            chunk=result.chunk,
+            semantic_score=result.score,
+            hybrid_score=result.score,
+            rank=rank,
+        )
+        for rank, result in enumerate(results, start=1)
+    ]
+

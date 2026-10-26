@@ -1,0 +1,15 @@
+STATE MUTUAL PROPERTY & CASUALTY CO.
+COMMERCIAL PROPERTY UNDERWRITING MANUAL — BUILDING CONSTRUCTION CLASSES
+DOCUMENT IDENTIFIER: DOC-UW-2024-012
+VERSION: 2024.1
+EFFECTIVE DATE: 2024-02-01
+EXPIRATION DATE: 2026-12-31
+JURISDICTION: US-ALL
+
+SECTION - ISO CONSTRUCTION CLASSES 1 THROUGH 6
+Class 1: Frame — Buildings where the exterior walls, floors and roof are constructed of wood or other combustible materials.
+Class 2: Joisted Masonry — Buildings where the exterior walls are constructed of masonry materials such as brick, concrete block, or stone, but floors and roof are combustible wood.
+Class 3: Non-Combustible — Buildings where exterior walls, floors and roof are constructed of and supported by metal, asbestos, gypsum or other non-combustible materials.
+Class 4: Masonry Non-Combustible — Exterior walls constructed of masonry or fire-resistive materials not less than 4 inches thick with non-combustible floors and roofs.
+Class 5: Modified Fire Resistive — Buildings with exterior walls, floors and roof of masonry or other fire-resistive materials with fire-resistance rating of at least 1 hour but less than 2 hours.
+Class 6: Fire Resistive — Buildings with exterior bearing walls of solid masonry or reinforced concrete not less than 4 inches thick and floors/roofs of reinforced concrete with a fire-resistance rating of at least 2 hours.

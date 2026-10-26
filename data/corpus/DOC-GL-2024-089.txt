@@ -1,0 +1,18 @@
+STATE MUTUAL PROPERTY & CASUALTY CO.
+CLAIMS HANDLING GUIDELINES — WATER & FREEZE PERILS
+DOCUMENT IDENTIFIER: DOC-GL-2024-089
+VERSION: 2024.3
+EFFECTIVE DATE: 2024-01-15
+EXPIRATION DATE: 2026-12-31
+JURISDICTION: US-ALL
+
+SECTION - WATER DAMAGE INVESTIGATION GUIDELINES
+1. VERIFICATION OF FREEZING TEMPERATURE MAINTENANCE
+When investigating frozen pipe ruptures under HO-3 Peril 14, claims adjusters must verify that the insured maintained building heat at or above 55 degrees Fahrenheit prior to the freezing event.
+The adjuster should document:
+a. Smart thermostat logs or utility heating consumption records for the 72 hours preceding loss.
+b. If heat was not maintained, whether the domestic water supply was completely shut off and plumbing lines drained.
+c. If neither condition was met, coverage must be flagged for potential exclusion under neglect and failure to maintain heat.
+
+2. GRADUAL SEEPAGE VS SUDDEN DISCHARGE
+Leakage occurring continuously or repeatedly over 14 days or more constitutes gradual seepage and is strictly excluded under Section I - Perils Insured Against, Item 12.b(2). Sub-surface water line tests and moisture meter readings should establish the onset timeline.

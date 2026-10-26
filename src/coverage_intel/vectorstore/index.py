@@ -37,6 +37,17 @@ class VectorStore(Protocol):
     def get_chunk(self, chunk_id: str) -> Chunk | None: ...
 
 
+_DEFAULT_STORE: VectorStore | None = None
+
+
 def get_vector_store() -> VectorStore:
     """Return the configured vector store adapter."""
-    raise NotImplementedError("Implemented in phase-03-embeddings-and-vector-db.md")
+    global _DEFAULT_STORE
+    if _DEFAULT_STORE is None:
+        from .memory import InMemoryVectorStore
+        from .schema import CollectionSpec
+
+        spec = CollectionSpec(name="coverage-intel", dimensions=1536)
+        _DEFAULT_STORE = InMemoryVectorStore(spec)
+    return _DEFAULT_STORE
+

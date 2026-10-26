@@ -66,3 +66,25 @@ class MessageHistory:
             elif turns:
                 turns[-1].append(message)
         return turns
+
+
+def rewrite_followup_question(history: Sequence[ChatMessage], question: str) -> str:
+    """Rewrite a follow-up question using previous conversation context (LU 3.42)."""
+    user_turns = [m.content for m in history if m.role == "user"]
+    if not user_turns:
+        return question.strip()
+    last_query = user_turns[-1].strip()
+    q = question.strip()
+    if len(q.split()) > 10:
+        return q
+    anaphora = ("it", "this", "that", "the same", "what about", "how about", "and for", "does it")
+    if any(q.lower().startswith(prefix) or f" {prefix} " in f" {q.lower()} " for prefix in anaphora):
+        topic_words = [
+            w for w in last_query.split()
+            if w.lower() not in {"is", "are", "what", "does", "the", "a", "an", "under", "in", "to"}
+        ]
+        context_hint = " ".join(topic_words[:6])
+        if context_hint:
+            return f"{q} (regarding {context_hint})"
+    return q
+

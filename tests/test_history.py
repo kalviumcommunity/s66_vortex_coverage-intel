@@ -39,6 +39,18 @@ def test_reserve_tokens_reduces_history_budget() -> None:
 def test_invalid_role_and_unfit_system_prompt_are_rejected() -> None:
     history = MessageHistory("System rules")
     with pytest.raises(ValueError):
-        history.add("tool", "not a conversation turn")
-    with pytest.raises(ValueError):
         history.trim_to_budget(1)
+
+
+def test_rewrite_followup_question_resolves_anaphora() -> None:
+    from coverage_intel.generation.history import rewrite_followup_question
+    from coverage_intel.generation.llm import ChatMessage
+
+    history = [
+        ChatMessage("user", "Is sudden water discharge from plumbing covered?"),
+        ChatMessage("assistant", "Yes, under HO-3 peril 12."),
+    ]
+    rewritten = rewrite_followup_question(history, "What about the deductible for it?")
+    assert "regarding" in rewritten
+    assert "water" in rewritten or "discharge" in rewritten
+

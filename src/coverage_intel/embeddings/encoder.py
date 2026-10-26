@@ -136,6 +136,45 @@ class OpenAIEmbeddingClient:
         self.close()
 
 
+class DeterministicEmbedder:
+    """Deterministic offline embedder for tests, local execution, and fallback."""
+
+    def __init__(self, dimensions: int = 1536) -> None:
+        self._dimensions = dimensions
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts or any(not text.strip() for text in texts):
+            raise EmbeddingError("embedding input must contain non-empty text")
+        return [self.embed_query(t) for t in texts]
+
+    def embed_query(self, text: str) -> list[float]:
+        import hashlib
+
+        vec = [0.0] * self._dimensions
+        words = text.lower().split()
+        if not words:
+            vec[0] = 1.0
+            return vec
+        for word in words:
+            h = int(hashlib.sha256(word.encode("utf-8")).hexdigest(), 16)
+            idx = h % self._dimensions
+            sign = 1.0 if ((h >> 16) & 1) else -1.0
+            vec[idx] += sign
+        norm = math.sqrt(sum(v * v for v in vec))
+        if norm == 0.0:
+            vec[0] = 1.0
+            return vec
+        return [v / norm for v in vec]
+
+    @property
+    def dimensions(self) -> int:
+        return self._dimensions
+
+
 def get_embedder(settings: Settings | None = None) -> Embedder:
-    """Return the configured embedding provider."""
-    return OpenAIEmbeddingClient(settings or get_settings())
+    """Return the configured embedding provider or deterministic fallback."""
+    cfg = settings or get_settings()
+    if cfg.embedding_api_key and cfg.embedding_model and cfg.embedding_model != "local":
+        return OpenAIEmbeddingClient(cfg)
+    return DeterministicEmbedder()
+

@@ -1,0 +1,23 @@
+STATE MUTUAL PROPERTY & CASUALTY CO.
+ENDORSEMENT FORM HO-04-95 (ED. 06/23)
+WATER BACKUP AND SUMP DISCHARGE OR OVERFLOW ENDORSEMENT
+POLICY IDENTIFIER: END-WATER-2023
+LINKED POLICY: POL-HO3-2024
+VERSION: 2023.2
+EFFECTIVE DATE: 2023-06-01
+EXPIRATION DATE: 2026-12-31
+JURISDICTION: US-ALL
+
+SECTION - ENDORSEMENT PROVISIONS
+SCHEDULE OF COVERAGE
+Limit of Liability: $10,000 per occurrence.
+Deductible: $500 per loss.
+
+1. COVERAGE MODIFICATION
+We insure for direct physical loss, not caused by the negligence of any insured, to property covered under Section I caused by:
+(1) Water or water-borne material which backs up through sewers or drains; or
+(2) Water or water-borne material which overflows or is discharged from a sump, sump pump or related equipment, even if the overflow or discharge results from mechanical breakdown of the sump pump.
+This coverage does not apply to direct physical loss resulting from power interruption unless the power failure was caused by a covered Peril on the residence premises.
+
+2. PRECEDENCE & RELATION TO BASE POLICY
+This endorsement overrides and supersedes Section I - Exclusion 1.b (Water Damage Exclusion - sewer backup and sump discharge) of policy POL-HO3-2024. All other terms, limits, and exclusions of the base policy remain in full effect.
