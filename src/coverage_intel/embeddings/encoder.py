@@ -12,6 +12,11 @@ import math
 from dataclasses import dataclass
 from typing import Protocol
 
+import httpx
+
+from ..config import Settings, get_settings
+from ..errors import EmbeddingError
+
 
 @dataclass(frozen=True, slots=True)
 class EmbeddingVector:
@@ -64,6 +69,73 @@ class Embedder(Protocol):
     def dimensions(self) -> int: ...
 
 
-def get_embedder() -> Embedder:
+class OpenAIEmbeddingClient:
+    """OpenAI-compatible embeddings client with consistent vector dimensions."""
+
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        http_client: httpx.Client | None = None,
+    ) -> None:
+        if not settings.embedding_api_key:
+            raise EmbeddingError("CI_EMBEDDING_API_KEY is required for embedding requests")
+        if not settings.embedding_model:
+            raise EmbeddingError("CI_EMBEDDING_MODEL is required for embedding requests")
+        base_url = settings.embedding_base_url or "https://api.openai.com/v1"
+        self._settings = settings
+        self._client = http_client or httpx.Client(base_url=base_url.rstrip("/"))
+        self._owns_client = http_client is None
+        self._dimensions: int | None = None
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Embed a non-empty batch and preserve provider input order."""
+        if not texts or any(not text.strip() for text in texts):
+            raise EmbeddingError("embedding input must contain non-empty text")
+        try:
+            response = self._client.post(
+                "/embeddings",
+                headers={"Authorization": f"Bearer {self._settings.embedding_api_key}"},
+                json={"model": self._settings.embedding_model, "input": texts},
+                timeout=self._settings.llm_timeout_seconds,
+            )
+            response.raise_for_status()
+            entries = sorted(response.json()["data"], key=lambda item: item["index"])
+            vectors = [list(map(float, entry["embedding"])) for entry in entries]
+            validate_batch([EmbeddingVector(tuple(vector)) for vector in vectors])
+        except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
+            raise EmbeddingError(f"Embedding request failed: {exc}") from exc
+        if len(vectors) != len(texts):
+            raise EmbeddingError("embedding provider returned an incomplete batch")
+        dimensions = len(vectors[0])
+        if self._dimensions is not None and dimensions != self._dimensions:
+            raise EmbeddingError("embedding dimensions changed during client lifetime")
+        self._dimensions = dimensions
+        return vectors
+
+    def embed_query(self, text: str) -> list[float]:
+        """Embed one query using the same configured model as documents."""
+        return self.embed_documents([text])[0]
+
+    @property
+    def dimensions(self) -> int:
+        """Return dimensions discovered from the first successful response."""
+        if self._dimensions is None:
+            raise EmbeddingError("embedding dimensions are unknown before the first request")
+        return self._dimensions
+
+    def close(self) -> None:
+        """Close the underlying HTTP client when owned by this instance."""
+        if self._owns_client:
+            self._client.close()
+
+    def __enter__(self) -> OpenAIEmbeddingClient:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
+
+def get_embedder(settings: Settings | None = None) -> Embedder:
     """Return the configured embedding provider."""
-    raise NotImplementedError("Implemented in phase-03-embeddings-and-vector-db.md")
+    return OpenAIEmbeddingClient(settings or get_settings())
