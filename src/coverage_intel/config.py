@@ -5,7 +5,7 @@ See docs/DEPLOYMENT.md §3 for the environment variable reference.
 
 from __future__ import annotations
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,13 +15,14 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CI_", env_file=".env", extra="ignore")
 
     # ── Models ───────────────────────────────────────────────
-    llm_model: str = ""
+    llm_model: str = "gpt-4o-mini"
     embedding_model: str = ""
     llm_base_url: str | None = None
     embedding_base_url: str | None = None
     rerank_model: str | None = None
 
     llm_api_key: str = ""
+    llm_timeout_seconds: float = 30.0
     embedding_api_key: str = ""
     upload_access_key: str = ""
 
