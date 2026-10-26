@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from coverage_intel.config import Settings, get_settings
 from coverage_intel.errors import GenerationError
+from coverage_intel.generation.parameters import ModelParameters
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -79,17 +80,24 @@ class OpenAIChatClient:
         stop: Sequence[str] | None = None,
     ) -> Completion:
         """Send one completion request and translate provider failures."""
+        try:
+            parameters = ModelParameters.from_values(
+                temperature=temperature, max_tokens=max_tokens, stop=stop
+            )
+        except ValueError as exc:
+            raise GenerationError(f"Invalid model parameters: {exc}") from exc
+
         payload: dict[str, Any] = {
             "model": self._settings.llm_model,
             "messages": [
                 {"role": message.role, "content": message.content} for message in messages
             ],
-            "temperature": temperature,
+            "temperature": parameters.temperature,
         }
-        if max_tokens is not None:
-            payload["max_tokens"] = max_tokens
-        if stop is not None:
-            payload["stop"] = list(stop)
+        if parameters.max_tokens is not None:
+            payload["max_tokens"] = parameters.max_tokens
+        if parameters.stop:
+            payload["stop"] = list(parameters.stop)
 
         try:
             response = self._client.post(
