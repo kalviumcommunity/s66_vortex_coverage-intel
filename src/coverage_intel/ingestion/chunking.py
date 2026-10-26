@@ -9,13 +9,32 @@ Spec: specs/04-ingestion.md
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 
 import tiktoken
 
 from .loaders import Block
 from .metadata import Chunk, SourceCategory
 
-_ENCODING = tiktoken.get_encoding("cl100k_base")
+
+@dataclass(frozen=True, slots=True)
+class TokenChunkingConfig:
+    """Tokenizer-aware chunk window configuration."""
+
+    size: int = 500
+    overlap: int = 50
+    model: str = "gpt-4o-mini"
+
+    def __post_init__(self) -> None:
+        if self.size < 1 or self.overlap < 0 or self.overlap >= self.size:
+            raise ValueError("size must be positive and overlap must be less than size")
+
+
+def _encoding(model: str) -> tiktoken.Encoding:
+    try:
+        return tiktoken.encoding_for_model(model)
+    except KeyError:
+        return tiktoken.get_encoding("cl100k_base")
 
 
 def chunk(
@@ -25,10 +44,11 @@ def chunk(
     *,
     document_id: str = "unknown-document",
     category: SourceCategory = SourceCategory.APPROVED_REFERENCE,
+    model: str = "gpt-4o-mini",
 ) -> list[Chunk]:
     """Split blocks into retrieval units respecting section boundaries."""
-    if size < 1 or overlap < 0 or overlap >= size:
-        raise ValueError("size must be positive and overlap must be less than size")
+    config = TokenChunkingConfig(size=size, overlap=overlap, model=model)
+    encoding = _encoding(config.model)
 
     groups: dict[str, list[Block]] = {}
     for block in blocks:
@@ -36,23 +56,27 @@ def chunk(
             groups.setdefault(block.section or "Unsectioned", []).append(block)
 
     result: list[Chunk] = []
-    step = size - overlap
+    step = config.size - config.overlap
     for section, section_blocks in groups.items():
         token_ids: list[int] = []
         token_pages: list[int | None] = []
         for block in section_blocks:
-            ids = _ENCODING.encode(block.text)
+            ids = encoding.encode(block.text)
             token_ids.extend(ids)
             token_pages.extend([block.page] * len(ids))
         for start in range(0, len(token_ids), step):
-            window = token_ids[start : start + size]
+            window = token_ids[start : start + config.size]
             if not window:
                 continue
-            text = _ENCODING.decode(window).strip()
+            text = encoding.decode(window).strip()
             if not text:
                 continue
-            pages = [page for page in token_pages[start : start + size] if page is not None]
-            source_blocks = section_blocks_for_window(section_blocks, start, size)
+            pages = [
+                page for page in token_pages[start : start + config.size] if page is not None
+            ]
+            source_blocks = section_blocks_for_window(
+                section_blocks, start, config.size, encoding
+            )
             char_start = next(
                 (block.char_start for block in source_blocks if block.char_start is not None), None
             )
@@ -78,17 +102,19 @@ def chunk(
                     category=category,
                 )
             )
-            if start + size >= len(token_ids):
+            if start + config.size >= len(token_ids):
                 break
     return result
 
 
-def section_blocks_for_window(blocks: list[Block], start: int, size: int) -> list[Block]:
+def section_blocks_for_window(
+    blocks: list[Block], start: int, size: int, encoding: tiktoken.Encoding
+) -> list[Block]:
     """Approximate the source blocks touched by a token window."""
     cursor = 0
     touched: list[Block] = []
     for block in blocks:
-        block_size = len(_ENCODING.encode(block.text))
+        block_size = len(encoding.encode(block.text))
         if cursor + block_size > start and cursor < start + size:
             touched.append(block)
         cursor += block_size
