@@ -12,6 +12,7 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 from ..retrieval.semantic import RetrievedEvidence
+from .tokens import TokenCounter
 
 
 class Context(BaseModel):
@@ -25,4 +26,20 @@ class Context(BaseModel):
 
 def assemble(evidence: list[RetrievedEvidence], budget: int | None = None) -> Context:
     """Assemble a bounded context from selected evidence."""
-    raise NotImplementedError("Implemented in phase-05-rag-core.md")
+    if budget is not None and budget < 1:
+        raise ValueError("budget must be positive")
+    counter = TokenCounter()
+    selected: list[RetrievedEvidence] = []
+    blocks: list[str] = []
+    used = 0
+    truncated = False
+    for item in evidence:
+        block = f"[{item.chunk.chunk_id}] {item.chunk.text}"
+        tokens = counter.count_text(block)
+        if budget is not None and used + tokens > budget:
+            truncated = True
+            break
+        selected.append(item)
+        blocks.append(block)
+        used += tokens
+    return Context(text="\n\n".join(blocks), blocks=selected, token_count=used, truncated=truncated)
