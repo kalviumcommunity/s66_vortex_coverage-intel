@@ -10,6 +10,7 @@ from datetime import date
 from pydantic import BaseModel
 
 from ..ingestion.metadata import Chunk
+from ..vectorstore.index import ScoredChunk, VectorStore
 
 
 class Scenario(BaseModel):
@@ -36,6 +37,28 @@ class RetrievedEvidence(BaseModel):
     rerank_score: float | None = None
     rank: int = 0
     retrieval_trace_id: str = ""
+
+
+def top_k_search(
+    store: VectorStore,
+    query_vector: list[float],
+    k: int = 5,
+    trace_id: str = "",
+) -> list[RetrievedEvidence]:
+    """Convert vector-store results into ranked semantic evidence."""
+    if k < 1:
+        raise ValueError("k must be positive")
+    results: list[ScoredChunk] = store.search(query_vector, k)
+    return [
+        RetrievedEvidence(
+            chunk=result.chunk,
+            semantic_score=result.score,
+            hybrid_score=result.score,
+            rank=rank,
+            retrieval_trace_id=trace_id,
+        )
+        for rank, result in enumerate(results, start=1)
+    ]
 
 
 def retrieve(
