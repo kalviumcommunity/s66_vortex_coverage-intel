@@ -27,6 +27,7 @@ def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
     ]
+    processors.append(redact)
     processors.append(
         structlog.processors.JSONRenderer() if json_format else structlog.dev.ConsoleRenderer()
     )
