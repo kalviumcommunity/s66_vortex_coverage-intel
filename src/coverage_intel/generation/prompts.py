@@ -10,6 +10,8 @@ Templates:
 
 from __future__ import annotations
 
+from coverage_intel.generation.llm import ChatMessage
+
 SYSTEM_ROLE = """You are Coverage Intel, an insurance coverage decision-support \
 assistant for claims adjusters.
 
@@ -66,3 +68,27 @@ PROMPTS: dict[str, str] = {
     "insufficient": INSUFFICIENT,
     "conflict": CONFLICT,
 }
+
+
+def build_messages(system_prompt: str, user_prompt: str) -> tuple[ChatMessage, ChatMessage]:
+    """Build an ordered system/user conversation for a chat completion."""
+    if not system_prompt.strip():
+        raise ValueError("system_prompt must not be empty")
+    if not user_prompt.strip():
+        raise ValueError("user_prompt must not be empty")
+    return ChatMessage(role="system", content=system_prompt), ChatMessage(
+        role="user", content=user_prompt
+    )
+
+
+def build_grounded_messages(
+    question: str,
+    context: str,
+    *,
+    scenario: str = "",
+) -> tuple[ChatMessage, ChatMessage]:
+    """Render the grounded-answer template into system and user roles."""
+    user_prompt = GROUNDED_ANSWER.format(
+        scenario=scenario.strip(), question=question.strip(), context=context.strip()
+    )
+    return build_messages(SYSTEM_ROLE, user_prompt)
