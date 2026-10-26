@@ -65,6 +65,12 @@ class Settings(BaseSettings):
             raise ValueError("CI_HYBRID_ALPHA must be between 0.0 and 1.0")
         if not 1 <= self.top_k <= 20:
             raise ValueError("CI_TOP_K must be between 1 and 20")
+        if self.similarity_threshold < 0 or self.relevance_floor < 0:
+            raise ValueError("similarity and relevance thresholds must be non-negative")
+        if self.max_context_tokens < 1 or self.rerank_top_n < 1:
+            raise ValueError("context and rerank limits must be positive")
+        if not 1 <= self.api_port <= 65535:
+            raise ValueError("CI_API_PORT must be a valid TCP port")
         return self
 
 
