@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from ..embeddings.encoder import EmbeddingVector
 from ..embeddings.similarity import cosine_similarity
 from ..ingestion.metadata import Chunk
+from ..retrieval.filters import matches
 from .index import ScoredChunk
 from .schema import CollectionSpec
 
@@ -49,13 +50,17 @@ class InMemoryVectorStore:
         """Return the number of indexed chunks."""
         return len(self._items)
 
-    def search(self, vector: list[float], k: int) -> list[ScoredChunk]:
+    def search(
+        self, vector: list[float], k: int, filters: object | None = None
+    ) -> list[ScoredChunk]:
         """Return the highest cosine-scored stored chunks."""
         query = EmbeddingVector(tuple(vector))
         if query.dimensions != self.spec.dimensions:
             raise ValueError("query dimensions do not match collection")
+        metadata_filters = filters if isinstance(filters, dict) else None
         results = [
             ScoredChunk(chunk=chunk, score=cosine_similarity(query, stored))
             for chunk, stored in self._items.values()
+            if matches(chunk, metadata_filters)
         ]
         return sorted(results, key=lambda result: result.score, reverse=True)[:k]
