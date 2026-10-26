@@ -58,7 +58,37 @@ def evaluate(evidence: list[object], analysis: Any = None) -> GuardrailResult:
       4. unresolved conflict
       5. all supporting chunks metadata_incomplete
     """
-    raise NotImplementedError("Implemented in phase-05-rag-core.md")
+    if not evidence:
+        return GuardrailResult(
+            triggered=True,
+            blocked=True,
+            warnings=[
+                Warning(
+                    kind=WarningKind.INSUFFICIENT_EVIDENCE,
+                    severity="blocking",
+                    message="No supporting evidence was retrieved.",
+                )
+            ],
+        )
+    incomplete = [
+        getattr(item, "chunk", item).chunk_id
+        for item in evidence
+        if getattr(getattr(item, "chunk", item), "metadata_incomplete", False)
+    ]
+    if len(incomplete) == len(evidence):
+        return GuardrailResult(
+            triggered=True,
+            blocked=True,
+            warnings=[
+                Warning(
+                    kind=WarningKind.METADATA_INCOMPLETE,
+                    severity="blocking",
+                    message="All supporting evidence has incomplete metadata.",
+                    chunk_ids=incomplete,
+                )
+            ],
+        )
+    return GuardrailResult(triggered=False, blocked=False)
 
 
 def analyse(evidence: list[object], scenario: Any = None) -> Any:
