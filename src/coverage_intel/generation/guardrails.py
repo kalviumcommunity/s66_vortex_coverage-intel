@@ -71,7 +71,7 @@ def evaluate(evidence: list[object], analysis: Any = None) -> GuardrailResult:
             ],
         )
     incomplete = [
-        getattr(item, "chunk", item).chunk_id
+        getattr(getattr(item, "chunk", item), "chunk_id", "")
         for item in evidence
         if getattr(getattr(item, "chunk", item), "metadata_incomplete", False)
     ]
