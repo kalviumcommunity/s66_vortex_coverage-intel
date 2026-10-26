@@ -11,7 +11,8 @@ Four surfaces, specified in [docs/UX.md](../docs/UX.md). Phase 08.
 
 ## Status
 
-⬜ **Not started.** Stack decision pending (Phase 08).
+✅ **Complete.** Built with modern, zero-dependency HTML5/Vanilla CSS/JavaScript, fully adhering to [docs/UX.md](../docs/UX.md) and mounted directly in FastAPI at `/ui/`.
+
 
 ## Non-negotiable UI rules
 

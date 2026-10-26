@@ -12,3 +12,11 @@ def test_core_api_flow_exposes_health_and_safe_ask_response() -> None:
     assert answer.status_code == 200
     assert answer.json()["status"] == "insufficient_evidence"
     assert answer.headers["X-Request-ID"]
+
+
+def test_ui_endpoint_serves_html() -> None:
+    client = TestClient(create_app())
+    response = client.get("/ui/", follow_redirects=True)
+    assert response.status_code == 200
+    assert "Coverage Intel" in response.text
+

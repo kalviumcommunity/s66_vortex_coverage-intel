@@ -6,6 +6,7 @@ Phase: phase-07-backend-api.md
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
@@ -73,7 +74,19 @@ def create_app() -> FastAPI:
         """Report process health without making external provider calls."""
         return {"status": "ok", "service": "coverage-intel"}
 
+    ui_dir = Path(__file__).resolve().parent.parent.parent.parent / "ui"
+    if ui_dir.exists():
+        from fastapi.responses import RedirectResponse
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/ui", StaticFiles(directory=str(ui_dir), html=True), name="ui")
+
+        @app.get("/")
+        async def root() -> RedirectResponse:
+            return RedirectResponse(url="/ui/")
+
     return app
+
 
 
 def _error_response(exc: CoverageIntelError) -> JSONResponse:
