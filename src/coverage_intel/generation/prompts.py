@@ -10,6 +10,9 @@ Templates:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from string import Formatter
+
 from coverage_intel.generation.llm import ChatMessage
 
 SYSTEM_ROLE = """You are Coverage Intel, an insurance coverage decision-support \
@@ -63,6 +66,42 @@ CONFLICT = """The retrieved sources conflict and precedence cannot be determined
 Present both positions with their citations, state that the conflict is \
 unresolved, and request human review. Do not select one source."""
 
+@dataclass(frozen=True, slots=True)
+class PromptTemplate:
+    """A named, reusable prompt with checked format placeholders."""
+
+    name: str
+    template: str
+
+    @property
+    def placeholders(self) -> frozenset[str]:
+        """Return all named placeholders used by this template."""
+        return frozenset(
+            field_name
+            for _, field_name, _, _ in Formatter().parse(self.template)
+            if field_name is not None
+        )
+
+    def render(self, **values: object) -> str:
+        """Render the template and reject missing or unexpected values."""
+        missing = self.placeholders - values.keys()
+        unexpected = values.keys() - self.placeholders
+        if missing or unexpected:
+            details = []
+            if missing:
+                details.append(f"missing: {sorted(missing)}")
+            if unexpected:
+                details.append(f"unexpected: {sorted(unexpected)}")
+            raise ValueError(f"Invalid values for {self.name}: {', '.join(details)}")
+        return self.template.format(**values)
+
+
+TEMPLATES: dict[str, PromptTemplate] = {
+    "grounded_answer": PromptTemplate("grounded_answer", GROUNDED_ANSWER),
+    "insufficient": PromptTemplate("insufficient", INSUFFICIENT),
+    "conflict": PromptTemplate("conflict", CONFLICT),
+}
+
 PROMPTS: dict[str, str] = {
     "grounded_answer": GROUNDED_ANSWER,
     "insufficient": INSUFFICIENT,
@@ -88,7 +127,7 @@ def build_grounded_messages(
     scenario: str = "",
 ) -> tuple[ChatMessage, ChatMessage]:
     """Render the grounded-answer template into system and user roles."""
-    user_prompt = GROUNDED_ANSWER.format(
+    user_prompt = TEMPLATES["grounded_answer"].render(
         scenario=scenario.strip(), question=question.strip(), context=context.strip()
     )
     return build_messages(SYSTEM_ROLE, user_prompt)
