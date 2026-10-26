@@ -30,6 +30,14 @@ class GenerationError(CoverageIntelError):
     retryable = True
 
 
+class EmbeddingError(CoverageIntelError):
+    """Embedding provider failed or returned invalid vectors."""
+
+    http_status = 502
+    error_code = "EmbeddingError"
+    retryable = True
+
+
 class UnsupportedDocumentType(CoverageIntelError):  # noqa: N818 - public error code name
     """File is not PDF, DOCX, or TXT."""
 
