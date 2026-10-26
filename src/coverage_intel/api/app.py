@@ -5,9 +5,10 @@ Phase: phase-07-backend-api.md
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
 from ..config import get_settings
@@ -34,6 +35,16 @@ def create_app() -> FastAPI:
         description=DESCRIPTION,
         version="0.1.0",
     )
+
+    @app.middleware("http")
+    async def request_id_middleware(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        """Attach a stable request ID to every response."""
+        request_id = request.headers.get("X-Request-ID", str(uuid4()))
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
 
     @app.exception_handler(CoverageIntelError)
     async def _handle_known_error(_request: Request, exc: CoverageIntelError) -> JSONResponse:
