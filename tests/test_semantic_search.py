@@ -8,11 +8,17 @@ def test_top_k_search_returns_score_order_and_trace() -> None:
     store = InMemoryVectorStore(CollectionSpec("chunks", dimensions=2))
     chunks = [
         Chunk(
-            chunk_id="a", document_id="d", text="a", token_count=1,
+            chunk_id="a",
+            document_id="d",
+            text="a",
+            token_count=1,
             category=SourceCategory.POLICY,
         ),
         Chunk(
-            chunk_id="b", document_id="d", text="b", token_count=1,
+            chunk_id="b",
+            document_id="d",
+            text="b",
+            token_count=1,
             category=SourceCategory.POLICY,
         ),
     ]
