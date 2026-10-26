@@ -89,4 +89,20 @@ class Chunk(BaseModel):
 
 def attach_metadata(chunk: Chunk, document: SourceDocument) -> Chunk:
     """Inherit provenance metadata from the source document."""
-    raise NotImplementedError("Implemented in phase-02-ingestion.md")
+    if chunk.document_id not in {document.document_id, "unknown-document"}:
+        raise ValueError("chunk document_id does not match source document")
+    values = chunk.model_dump()
+    values.update(
+        {
+            "document_id": document.document_id,
+            "category": document.category,
+            "version": document.version,
+            "effective_from": document.effective_from,
+            "effective_to": document.effective_to,
+            "jurisdiction": document.jurisdiction,
+            "linked_policy_id": document.linked_policy_id,
+            "metadata_incomplete": False,
+            "missing_fields": [],
+        }
+    )
+    return Chunk.model_validate(values)
