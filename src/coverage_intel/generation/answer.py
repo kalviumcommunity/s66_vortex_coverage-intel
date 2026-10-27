@@ -92,13 +92,46 @@ def generate(question: str, context: Context, query_id: str) -> CoverageAnswer:
             summary="Insufficient evidence was retrieved to answer this question.",
             generated_at=now,
         )
+
+    # Build citations from evidence chunks — every citation resolves to a real chunk
+    citations = []
+    for idx, block in enumerate(context.blocks, 1):
+        chunk = block.chunk
+        citations.append(
+            Citation(
+                citation_index=idx,
+                chunk_id=chunk.chunk_id,
+                document_id=chunk.document_id,
+                document_title=chunk.document_id,
+                section=chunk.section,
+                page=chunk.page,
+                version=chunk.version,
+                effective_from=chunk.effective_from,
+                effective_to=chunk.effective_to,
+                jurisdiction=chunk.jurisdiction,
+                category=chunk.category,
+                excerpt=chunk.text,
+            )
+        )
+
+    # Build statements — each statement cites its own evidence chunk
+    statements = []
+    for idx, block in enumerate(context.blocks, 1):
+        chunk = block.chunk
+        statements.append(
+            AnswerStatement(text=chunk.text, citation_indices=[idx])
+        )
+
+    # Build summary from the most relevant evidence
     summary = context.blocks[0].chunk.text
+
     return CoverageAnswer(
         query_id=query_id,
         question=question,
-        status=AnswerStatus.WEAK_EVIDENCE,
+        status=AnswerStatus.GROUNDED,
         summary=summary,
-        statements=[AnswerStatement(text=summary)],
+        statements=statements,
+        citations=citations,
         evidence=context.blocks,
         generated_at=now,
     )
