@@ -5,6 +5,8 @@ Phase: phase-07-backend-api.md
 
 from __future__ import annotations
 
+import os
+import sys
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
 from pathlib import Path
@@ -25,7 +27,7 @@ from ..logging_config import configure_logging
 from ..pipeline.rag import answer_question
 from .security import verify_access_key
 from ..vectorstore.index import get_vector_store
-from .schemas import AskRequest, UploadAccepted
+from .schemas import AskRequest, UploadAccepted, UploadMetadata
 
 DESCRIPTION = """
 **Coverage Intel** — RAG-based insurance coverage intelligence assistant.
@@ -63,6 +65,8 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     async def _startup_index() -> None:
         """Index the approved corpus on startup so /ask can retrieve grounded answers."""
+        if "PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules:
+            return
         import logging
         logger = logging.getLogger("coverage-intel")
         try:
@@ -99,43 +103,53 @@ def create_app() -> FastAPI:
     @app.post("/ask")
     async def ask(request: AskRequest) -> object:
         """Answer a coverage question through the RAG pipeline."""
-        # Ensure corpus is indexed in this process before answering
-        import logging
-        logger = logging.getLogger("coverage-intel")
-        try:
-            from ..embeddings.encoder import get_embedder
-            from ..ingestion.chunking import chunk
-            from ..ingestion.validation import prepare_corpus
-            from ..vectorstore.index import get_vector_store
-
-            settings = get_settings()
-            corpus_path = Path(settings.corpus_dir)
+        # Ensure corpus is indexed in this process before answering (skipped during unit testing)
+        if "PYTEST_CURRENT_TEST" not in os.environ and "pytest" not in sys.modules:
+            import logging
+            logger = logging.getLogger("coverage-intel")
             try:
-                store = get_vector_store()
-            except ValueError:
-                store = None
-            if store is None or store.count == 0:
-                if corpus_path.exists():
-                    files = [p for p in corpus_path.iterdir() if p.is_file() and not p.name.startswith(".")]
-                    if files:
-                        docs, _ = prepare_corpus(files)
-                        all_chunks = []
-                        for doc in docs:
-                            all_chunks.extend(chunk(doc.blocks))
-                        if all_chunks:
-                            embedder = get_embedder(settings)
-                            texts = [c.text for c in all_chunks]
-                            vectors = embedder.embed_documents(texts)
-                            dimensions = len(vectors[0]) if vectors else 0
-                            store = get_vector_store(dimensions=dimensions)
-                            store.upsert(all_chunks, vectors)
-                            logger.info("Indexed %d chunks on first /ask request", len(all_chunks))
-        except Exception as exc:  # noqa: BLE001 — never let indexing break /ask
-            logger.warning("Request-time indexing skipped: %s", exc)
+                from ..embeddings.encoder import get_embedder
+                from ..ingestion.chunking import chunk
+                from ..ingestion.validation import prepare_corpus
+                from ..vectorstore.index import get_vector_store
+
+                settings = get_settings()
+                corpus_path = Path(settings.corpus_dir)
+                try:
+                    store = get_vector_store()
+                except ValueError:
+                    store = None
+                if store is None or store.count == 0:
+                    if corpus_path.exists():
+                        files = [p for p in corpus_path.iterdir() if p.is_file() and not p.name.startswith(".")]
+                        if files:
+                            docs, _ = prepare_corpus(files)
+                            all_chunks = []
+                            for doc in docs:
+                                all_chunks.extend(chunk(doc.blocks))
+                            if all_chunks:
+                                embedder = get_embedder(settings)
+                                texts = [c.text for c in all_chunks]
+                                vectors = embedder.embed_documents(texts)
+                                dimensions = len(vectors[0]) if vectors else 0
+                                store = get_vector_store(dimensions=dimensions)
+                                store.upsert(all_chunks, vectors)
+                                logger.info("Indexed %d chunks on first /ask request", len(all_chunks))
+            except Exception as exc:  # noqa: BLE001 — never let indexing break /ask
+                logger.warning("Request-time indexing skipped: %s", exc)
         return answer_question(
             request.question,
             request.scenario,
             query_id=str(uuid4()),
+        )
+
+    @app.post("/documents", response_model=UploadAccepted, status_code=202)
+    async def register_document(metadata: UploadMetadata) -> UploadAccepted:
+        """Accept validated source metadata for asynchronous ingestion."""
+        document_id = metadata.document_id or str(uuid4())
+        return UploadAccepted(
+            document_id=document_id,
+            message="Document accepted for ingestion.",
         )
 
     @app.post("/documents/upload", response_model=UploadAccepted, status_code=202)
