@@ -15,7 +15,6 @@ from coverage_intel.pipeline.rag import answer_question
 from coverage_intel.retrieval.semantic import Scenario, retrieve
 
 
-
 def main() -> int:
     """Run the retrieval or RAG evaluation suite."""
     parser = argparse.ArgumentParser(description="Run the retrieval or RAG evaluation suite.")
@@ -59,21 +58,24 @@ def main() -> int:
             expected = expected_docs if expected_docs else expected_chunks
             actual = retrieved_doc_ids if expected_docs else retrieved_chunk_ids
             matched_actual = [
-                act for act in actual
+                act
+                for act in actual
                 if any(exp.lower() in act.lower() or act.lower() in exp.lower() for exp in expected)
             ]
             cases.append((expected, matched_actual))
 
-
             answer = answer_question(question, scenario=scenario)
-            rag_results.append({
-                "qid": item.get("qid"),
-                "category": item.get("category"),
-                "question": question,
-                "status": answer.status.value,
-                "acceptable_status": item.get("acceptable_status", []),
-                "pass": answer.status.value in item.get("acceptable_status", [answer.status.value]),
-            })
+            rag_results.append(
+                {
+                    "qid": item.get("qid"),
+                    "category": item.get("category"),
+                    "question": question,
+                    "status": answer.status.value,
+                    "acceptable_status": item.get("acceptable_status", []),
+                    "pass": answer.status.value
+                    in item.get("acceptable_status", [answer.status.value]),
+                }
+            )
 
     report = build_retrieval_report(cases, k=args.k)
 

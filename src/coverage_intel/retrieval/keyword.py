@@ -57,4 +57,3 @@ class KeywordIndex:
             )
             for rank, (score, chunk) in enumerate(scored[:k], start=1)
         ]
-

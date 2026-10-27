@@ -53,4 +53,3 @@ def test_rewrite_followup_question_resolves_anaphora() -> None:
     rewritten = rewrite_followup_question(history, "What about the deductible for it?")
     assert "regarding" in rewritten
     assert "water" in rewritten or "discharge" in rewritten
-

@@ -31,4 +31,3 @@ def answer_question(
         evidence = retrieve(question, scenario=scenario)
     context = assemble(evidence)
     return generate(question, context, query_id)
-

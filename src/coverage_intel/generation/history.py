@@ -81,11 +81,11 @@ def rewrite_followup_question(history: Sequence[ChatMessage], question: str) -> 
     q_lower = q.lower()
     if any(q_lower.startswith(prefix) or f" {prefix} " in f" {q_lower} " for prefix in anaphora):
         topic_words = [
-            w for w in last_query.split()
+            w
+            for w in last_query.split()
             if w.lower() not in {"is", "are", "what", "does", "the", "a", "an", "under", "in", "to"}
         ]
         context_hint = " ".join(topic_words[:6])
         if context_hint:
             return f"{q} (regarding {context_hint})"
     return q
-
