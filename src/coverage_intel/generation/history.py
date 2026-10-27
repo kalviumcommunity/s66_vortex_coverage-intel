@@ -78,7 +78,8 @@ def rewrite_followup_question(history: Sequence[ChatMessage], question: str) -> 
     if len(q.split()) > 10:
         return q
     anaphora = ("it", "this", "that", "the same", "what about", "how about", "and for", "does it")
-    if any(q.lower().startswith(prefix) or f" {prefix} " in f" {q.lower()} " for prefix in anaphora):
+    q_lower = q.lower()
+    if any(q_lower.startswith(prefix) or f" {prefix} " in f" {q_lower} " for prefix in anaphora):
         topic_words = [
             w for w in last_query.split()
             if w.lower() not in {"is", "are", "what", "does", "the", "a", "an", "under", "in", "to"}

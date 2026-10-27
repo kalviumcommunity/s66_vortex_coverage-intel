@@ -6,7 +6,6 @@ Phase: phase-05-rag-core.md
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
@@ -47,7 +46,9 @@ def _ensure_corpus_indexed() -> None:
 def main() -> int:
     """Ask a coverage question from the command line."""
     parser = argparse.ArgumentParser(description="Ask a coverage question from the command line.")
-    parser.add_argument("question", nargs="?", default=os.getenv("QUESTION", ""), help="Coverage question")
+    parser.add_argument(
+        "question", nargs="?", default=os.getenv("QUESTION", ""), help="Coverage question"
+    )
     parser.add_argument("--json", action="store_true", help="Output raw JSON response")
     parser.add_argument("--jurisdiction", default=None, help="Jurisdiction code (e.g. CA, FL)")
     parser.add_argument("--policy-type", default=None, help="Policy type (e.g. HO-3)")
@@ -56,7 +57,10 @@ def main() -> int:
 
     question = args.question.strip()
     if not question:
-        print("Error: No question provided. Pass a question as an argument or set QUESTION env var.", file=sys.stderr)
+        print(
+            "Error: No question provided. Pass a question as an argument or set QUESTION env var.",
+            file=sys.stderr,
+        )
         return 1
 
     _ensure_corpus_indexed()

@@ -36,7 +36,7 @@ def main() -> int:
         return 0
 
     print(f"Ingesting documents from {corpus_path}...")
-    documents, report = prepare_corpus(files)
+    documents, _ = prepare_corpus(files)
     if not documents:
         print("No valid documents to index.", file=sys.stderr)
         return 1

@@ -8,7 +8,6 @@ Spec: specs/05-retrieval.md
 
 from __future__ import annotations
 
-
 from ..ingestion.metadata import Chunk
 from .filters import matches
 from .semantic import RetrievedEvidence
@@ -23,7 +22,9 @@ class KeywordIndex:
     def set_chunks(self, chunks: list[Chunk]) -> None:
         self._chunks = list(chunks)
 
-    def search(self, query: str, k: int = 5, filters: object | None = None) -> list[RetrievedEvidence]:
+    def search(
+        self, query: str, k: int = 5, filters: object | None = None
+    ) -> list[RetrievedEvidence]:
         """Return the top-k chunks by keyword match score."""
         if not self._chunks or k < 1:
             return []

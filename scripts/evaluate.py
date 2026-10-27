@@ -10,12 +10,9 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from coverage_intel.evaluation.metrics import build_retrieval_report
 from coverage_intel.pipeline.rag import answer_question
 from coverage_intel.retrieval.semantic import Scenario, retrieve
-from scripts.ask import _ensure_corpus_indexed
 
 
 
@@ -34,6 +31,9 @@ def main() -> int:
     if not dataset_path.exists():
         print(f"Evaluation dataset not found: {dataset_path}", file=sys.stderr)
         return 1
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from scripts.ask import _ensure_corpus_indexed
 
     _ensure_corpus_indexed()
 
