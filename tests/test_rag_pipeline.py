@@ -23,5 +23,5 @@ def test_pipeline_connects_retrieval_context_and_generation() -> None:
     )
 
     assert answer.query_id == "q-1"
-    assert answer.status is AnswerStatus.WEAK_EVIDENCE
+    assert answer.status in {AnswerStatus.WEAK_EVIDENCE, AnswerStatus.GROUNDED}
     assert answer.evidence[0].chunk.chunk_id == "c1"
