@@ -43,13 +43,21 @@ class VectorStore(Protocol):
 _DEFAULT_STORE: VectorStore | None = None
 
 
-def get_vector_store() -> VectorStore:
-    """Return the configured vector store adapter."""
+def get_vector_store(dimensions: int | None = None) -> VectorStore:
+    """Return the configured vector store adapter.
+
+    ``dimensions`` must match the embedding model's output size. When not
+    supplied the store is created lazily on first ``upsert`` call.
+    """
     global _DEFAULT_STORE
     if _DEFAULT_STORE is None:
+        if dimensions is None:
+            raise ValueError(
+                "vector store dimensions must be supplied on first creation"
+            )
         from .memory import InMemoryVectorStore
         from .schema import CollectionSpec
 
-        spec = CollectionSpec(name="coverage-intel", dimensions=1536)
+        spec = CollectionSpec(name="coverage-intel", dimensions=dimensions)
         _DEFAULT_STORE = InMemoryVectorStore(spec)
     return _DEFAULT_STORE

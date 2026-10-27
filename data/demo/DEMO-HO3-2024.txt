@@ -1,0 +1,41 @@
+STATE MUTUAL PROPERTY & CASUALTY CO.
+DEMO POLICY FORM HO-2024 (ED. 01/24)
+HOMEOWNERS 3 — SPECIAL FORM COMPREHENSIVE POLICY (DEMO)
+POLICY IDENTIFIER: DEMO-HO3-2024
+VERSION: 2024.1
+EFFECTIVE DATE: 2024-01-01
+EXPIRATION DATE: 2025-12-31
+JURISDICTION: US-ALL
+
+AGREEMENT & DEFINITIONS
+We agree to provide the insurance described in this policy in return for the premium and compliance with all applicable policy provisions. Throughout this policy, 'you' and 'your' refer to the 'named insured' shown in the Declarations. 'We', 'us', and 'our' refer to the Company providing this insurance.
+
+SECTION I - PROPERTY COVERAGES
+COVERAGE A — DWELLING
+We cover:
+1. The dwelling on the 'residence premises' shown in the Declarations, including structures attached to the dwelling; and
+2. Materials and supplies located on or next to the 'residence premises' used to construct, alter or repair the dwelling or other structures on the 'residence premises'.
+
+COVERAGE C — PERSONAL PROPERTY
+We cover personal property owned or used by an 'insured' while it is anywhere in the world.
+
+SECTION I - PERILS INSURED AGAINST
+We insure against sudden and accidental direct physical loss to property described in Coverages A and B, unless the loss is excluded in Section I — Exclusions.
+
+12. ACCIDENTAL DISCHARGE OR OVERFLOW OF WATER OR STEAM
+a. This peril means accidental discharge or overflow of water or steam from within a plumbing, heating, air conditioning or automatic fire protective sprinkler system or from within a household appliance.
+b. This peril does not include loss caused by constant or repeated seepage or leakage of water or steam over a period of weeks, months or years.
+
+14. FREEZING OF PLUMBING AND APPLIANCES
+Freezing of a plumbing system, but only if you have used reasonable care to maintain heat in the building at or above 55 degrees Fahrenheit.
+
+SECTION I - EXCLUSIONS
+1. Water Damage Exclusion
+We do not insure for loss caused directly or indirectly by any of the following:
+a. Flood, surface water, waves, tidal water, overflow of any body of water;
+b. Water which backs up through sewers or drains or which overflows from a sump pump;
+c. Water below the surface of the ground.
+
+SCHEDULE OF COVERAGE
+Limit of Liability: $10,000 per occurrence.
+Deductible: $500 per loss.

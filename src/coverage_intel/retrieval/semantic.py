@@ -71,7 +71,11 @@ def retrieve(
     from ..embeddings.encoder import get_embedder
     from ..vectorstore.index import get_vector_store
 
-    store = get_vector_store()
+    try:
+        store = get_vector_store()
+    except ValueError:
+        # Vector store not yet initialised (indexing not run yet)
+        return []
     if store.count == 0:
         return []
     embedder = get_embedder()

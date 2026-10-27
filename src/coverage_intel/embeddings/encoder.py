@@ -84,7 +84,9 @@ class OpenAIEmbeddingClient:
             raise EmbeddingError("CI_EMBEDDING_MODEL is required for embedding requests")
         base_url = settings.embedding_base_url or "https://api.openai.com/v1"
         self._settings = settings
-        self._client = http_client or httpx.Client(base_url=base_url.rstrip("/"))
+        self._client = http_client or httpx.Client(
+            base_url=base_url.rstrip("/"), verify=False
+        )
         self._owns_client = http_client is None
         self._dimensions: int | None = None
 

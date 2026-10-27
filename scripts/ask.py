@@ -21,9 +21,6 @@ from coverage_intel.vectorstore.index import get_vector_store
 
 def _ensure_corpus_indexed() -> None:
     """Ensure corpus is indexed in the vector store before answering."""
-    store = get_vector_store()
-    if store.count > 0:
-        return
     settings = get_settings()
     corpus_path = Path(settings.corpus_dir)
     if not corpus_path.exists():
@@ -40,6 +37,10 @@ def _ensure_corpus_indexed() -> None:
     embedder = get_embedder(settings)
     texts = [c.text for c in all_chunks]
     vectors = embedder.embed_documents(texts)
+    dimensions = len(vectors[0]) if vectors else 0
+    store = get_vector_store(dimensions=dimensions)
+    if store.count > 0:
+        return
     store.upsert(all_chunks, vectors)
 
 

@@ -52,7 +52,8 @@ def main() -> int:
     vectors = embedder.embed_documents(texts)
 
     print("Indexing into vector store...")
-    store = get_vector_store()
+    dimensions = len(vectors[0]) if vectors else 0
+    store = get_vector_store(dimensions=dimensions)
     store.upsert(all_chunks, vectors)
 
     print(f"Successfully indexed {store.count} chunks into the vector store.")
