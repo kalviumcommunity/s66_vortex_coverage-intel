@@ -23,7 +23,7 @@ from ..ingestion.metadata import SourceCategory, SourceDocument, attach_metadata
 from ..ingestion.validation import prepare_corpus
 from ..logging_config import configure_logging
 from ..pipeline.rag import answer_question
-from ..security import verify_access_key
+from .security import verify_access_key
 from ..vectorstore.index import get_vector_store
 from .schemas import AskRequest, UploadAccepted
 
