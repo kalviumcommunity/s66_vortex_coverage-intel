@@ -148,10 +148,10 @@ async function executeAssistantQuery(question) {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
   // Prepare scenario metadata from sidebar
-  const policyType = document.getElementById('asstPolicyType')?.value || 'HO-3';
-  const dateOfLoss = document.getElementById('asstDateOfLoss')?.value || '2025-03-14';
-  const jurisdiction = document.getElementById('asstJurisdiction')?.value || 'CA';
-  const claimType = document.getElementById('asstClaimType')?.value || 'water_damage';
+  const policyType = document.getElementById('asstPolicyType')?.value || '';
+  const dateOfLoss = document.getElementById('asstDateOfLoss')?.value || '2024-06-15';
+  const jurisdiction = document.getElementById('asstJurisdiction')?.value || 'US-ALL';
+  const claimType = document.getElementById('asstClaimType')?.value || '';
 
   try {
     // Attempt live call to FastAPI backend
