@@ -177,4 +177,3 @@ def get_embedder(settings: Settings | None = None) -> Embedder:
     if cfg.embedding_api_key and cfg.embedding_model and cfg.embedding_model != "local":
         return OpenAIEmbeddingClient(cfg)
     return DeterministicEmbedder()
-

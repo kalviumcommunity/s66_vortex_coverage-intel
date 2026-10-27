@@ -99,4 +99,3 @@ def retrieve(
         )
         for rank, result in enumerate(results, start=1)
     ]
-

@@ -96,7 +96,7 @@ def main() -> int:
             sec = f" | Section: {c.section}" if c.section else ""
             pg = f" | Page: {c.page}" if c.page else ""
             print(f"  [{c.citation_index}] {c.document_id}{sec}{pg}")
-            print(f"      \"{c.excerpt[:120]}...\"")
+            print(f'      "{c.excerpt[:120]}..."')
         print()
 
     return 0

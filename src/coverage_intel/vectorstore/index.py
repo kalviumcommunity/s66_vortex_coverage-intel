@@ -26,6 +26,9 @@ class ScoredChunk(BaseModel):
 class VectorStore(Protocol):
     """Provider-agnostic vector store interface."""
 
+    @property
+    def count(self) -> int: ...
+
     def upsert(self, chunks: Sequence[Chunk], vectors: list[list[float]]) -> None: ...
 
     def search(
@@ -50,4 +53,3 @@ def get_vector_store() -> VectorStore:
         spec = CollectionSpec(name="coverage-intel", dimensions=1536)
         _DEFAULT_STORE = InMemoryVectorStore(spec)
     return _DEFAULT_STORE
-

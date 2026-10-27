@@ -19,4 +19,3 @@ def test_ui_endpoint_serves_html() -> None:
     response = client.get("/ui/", follow_redirects=True)
     assert response.status_code == 200
     assert "Coverage Intel" in response.text
-

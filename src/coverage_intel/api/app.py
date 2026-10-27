@@ -88,7 +88,6 @@ def create_app() -> FastAPI:
     return app
 
 
-
 def _error_response(exc: CoverageIntelError) -> JSONResponse:
     """Build the error envelope. Never includes a partial answer."""
     return JSONResponse(
