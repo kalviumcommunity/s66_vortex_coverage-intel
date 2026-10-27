@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
 from pathlib import Path
@@ -18,7 +19,7 @@ from fastapi import FastAPI, File, Form, Header, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
 
 from ..config import get_settings
-from ..errors import CoverageIntelError, ExtractionError, UnsupportedDocumentType
+from ..errors import CoverageIntelError, EmbeddingError, ExtractionError, UnsupportedDocumentType
 from ..ingestion.chunking import chunk
 from ..ingestion.loaders import ExtractedDocument
 from ..ingestion.metadata import SourceCategory, SourceDocument, attach_metadata
@@ -71,6 +72,7 @@ def _index_files(files: list[Path], logger: logging.Logger) -> int:
     """Load, chunk, attach metadata, embed, and upsert a list of corpus files.
 
     Returns the number of chunks indexed. Never raises.
+    Retries embedding on transient provider failures (e.g., 502).
     """
     from ..embeddings.encoder import get_embedder
     from ..vectorstore.index import get_vector_store
@@ -106,9 +108,24 @@ def _index_files(files: list[Path], logger: logging.Logger) -> int:
     if not all_chunks:
         return 0
 
+    # Retry embedding up to 3 times on transient failures
     embedder = get_embedder(settings)
     texts = [c.text for c in all_chunks]
-    vectors = embedder.embed_documents(texts)
+    vectors = None
+    last_error = None
+    for attempt in range(3):
+        try:
+            vectors = embedder.embed_documents(texts)
+            break
+        except Exception as exc:
+            last_error = exc
+            wait = 2 ** attempt
+            logger.warning("Embedding attempt %d failed: %s (retrying in %ds)", attempt + 1, exc, wait)
+            time.sleep(wait)
+    if vectors is None:
+        logger.error("Embedding failed after 3 attempts: %s", last_error)
+        return 0
+
     dimensions = len(vectors[0]) if vectors else 0
     store = get_vector_store(dimensions=dimensions)
     if store.count > 0:
@@ -266,7 +283,22 @@ def create_app() -> FastAPI:
 
             embedder = get_embedder(settings)
             texts = [c.text for c in final_chunks]
-            vectors = embedder.embed_documents(texts)
+
+            # Retry embedding up to 3 times on transient failures
+            vectors = None
+            last_error = None
+            for attempt in range(3):
+                try:
+                    vectors = embedder.embed_documents(texts)
+                    break
+                except Exception as exc:
+                    last_error = exc
+                    wait = 2 ** attempt
+                    logger.warning("Upload embedding attempt %d failed: %s (retrying in %ds)", attempt + 1, exc, wait)
+                    time.sleep(wait)
+            if vectors is None:
+                raise EmbeddingError(f"Embedding failed after 3 attempts: {last_error}")
+
             dimensions = len(vectors[0]) if vectors else 0
             store = get_vector_store(dimensions=dimensions)
             store.upsert(final_chunks, vectors)
