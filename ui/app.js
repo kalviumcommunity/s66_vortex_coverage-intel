@@ -443,36 +443,53 @@ function handleFileSelect(event) {
 }
 
 async function submitDocumentUpload() {
+  const fileInput = document.getElementById('uploadFileInput');
+  const file = fileInput?.files?.[0] || state.selectedFile;
   const title = document.getElementById('uploadDocTitle')?.value.trim();
   const docType = document.getElementById('uploadDocType')?.value || 'policy';
   const productLine = document.getElementById('uploadProductLine')?.value || 'Homeowners';
   const version = document.getElementById('uploadVersion')?.value || 'v1.0';
   const policyId = document.getElementById('uploadPolicyId')?.value || `DOC-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
   const effectiveDate = document.getElementById('uploadEffectiveDate')?.value || '2025-01-01';
+  const jurisdiction = document.getElementById('uploadJurisdiction')?.value || 'US-ALL';
 
+  if (!file) {
+    alert('Please select a file to upload.');
+    return;
+  }
   if (!title) {
     alert('Please enter a Document Official Name.');
     return;
   }
 
-  // Attempt backend API registration
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('document_id', policyId);
+  formData.append('category', docType);
+  formData.append('version', version);
+  formData.append('effective_from', effectiveDate);
+  formData.append('jurisdiction', jurisdiction);
+
+  // Attempt backend API upload with access key
   try {
-    const res = await fetch('/documents', {
+    const res = await fetch('/documents/upload', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: title,
-        category: docType,
-        document_id: policyId,
-        version: version,
-        jurisdiction: 'US-ALL'
-      })
+      headers: { 'X-Upload-Access-Key': 'dev-upload-key-change-me' },
+      body: formData,
     });
     if (res.ok) {
-      console.log('Document registered via API /documents');
+      const data = await res.json();
+      console.log('Document uploaded via API /documents/upload:', data);
+    } else {
+      const err = await res.json();
+      console.error('Upload failed:', err);
+      alert(`Upload failed: ${err.message || res.statusText}`);
+      return;
     }
   } catch (e) {
-    console.log('Document registered locally');
+    console.error('Upload error:', e);
+    alert('Upload error: backend not reachable. Is the server running?');
+    return;
   }
 
   // Prepend to Document Inventory table
@@ -488,7 +505,7 @@ async function submitDocumentUpload() {
       <td>${productLine}</td>
       <td>${version}</td>
       <td>${effectiveDate}</td>
-      <td>16 chunks</td>
+      <td>Indexed</td>
       <td><span class="badge badge-supported">Active</span></td>
       <td><button class="btn-sm-action" onclick="switchSurface('evidence')">Inspect</button></td>
     `;
@@ -508,7 +525,7 @@ async function submitDocumentUpload() {
 
   closeUploadModal();
   switchSurface('documents');
-  alert(`Document "${title}" ingested, chunked into 16 blocks, and indexed in Chroma vector collection.`);
+  alert(`Document "${title}" ingested, chunked, embedded, and indexed in the vector store.`);
 }
 
 // ── RAG Benchmark Runner ──────────────────────────────────────────────
