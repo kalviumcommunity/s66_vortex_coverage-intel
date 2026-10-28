@@ -173,9 +173,68 @@ class DeterministicEmbedder:
         return self._dimensions
 
 
+class PineconeEmbeddingClient:
+    """Pinecone Inference API embedding client for multilingual-e5-large."""
+
+    def __init__(self, api_key: str, model: str = "multilingual-e5-large") -> None:
+        from pinecone import Pinecone
+
+        self._pc = Pinecone(api_key=api_key)
+        self._model = model
+        self._dimensions = 1024
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts or any(not text.strip() for text in texts):
+            raise EmbeddingError("embedding input must contain non-empty text")
+        try:
+            all_vectors: list[list[float]] = []
+            for i in range(0, len(texts), 96):
+                batch = texts[i : i + 96]
+                res = self._pc.inference.embed(
+                    model=self._model,
+                    inputs=batch,
+                    parameters={"input_type": "passage", "truncate": "END"},
+                )
+                for item in res:
+                    all_vectors.append(list(item.values))
+            return all_vectors
+        except Exception as exc:
+            raise EmbeddingError(f"Pinecone embedding failed: {exc}") from exc
+
+    def embed_query(self, text: str) -> list[float]:
+        try:
+            res = self._pc.inference.embed(
+                model=self._model,
+                inputs=[text],
+                parameters={"input_type": "query", "truncate": "END"},
+            )
+            return list(res[0].values)
+        except Exception as exc:
+            raise EmbeddingError(f"Pinecone query embedding failed: {exc}") from exc
+
+    @property
+    def dimensions(self) -> int:
+        return self._dimensions
+
+    def close(self) -> None:
+        pass
+
+    def __enter__(self) -> "PineconeEmbeddingClient":
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        pass
+
+
 def get_embedder(settings: Settings | None = None) -> Embedder:
     """Return the configured embedding provider or deterministic fallback."""
+    import os
+
     cfg = settings or get_settings()
+    pinecone_key = cfg.embedding_api_key or os.getenv("PINECONE_API_KEY") or ""
+    if pinecone_key.startswith("pcsk_") or "e5" in (cfg.embedding_model or "").lower():
+        return PineconeEmbeddingClient(api_key=pinecone_key, model=cfg.embedding_model or "multilingual-e5-large")
+
     if cfg.embedding_api_key and cfg.embedding_model and cfg.embedding_model != "local":
         return OpenAIEmbeddingClient(cfg)
     return DeterministicEmbedder()

@@ -1,6 +1,6 @@
 """Vector store behind a provider-agnostic interface — FR-07.
 
-Chroma in development, Qdrant in production, selected via ``CI_VECTOR_STORE``.
+Pinecone in production, InMemory in development / unit tests.
 Both sit behind ``VectorStore`` so pipeline logic never changes.
 
 Spec: specs/05-retrieval.md
@@ -8,6 +8,7 @@ Spec: specs/05-retrieval.md
 
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 from typing import Protocol
 
@@ -46,11 +47,21 @@ _DEFAULT_STORE: VectorStore | None = None
 def get_vector_store(dimensions: int | None = None) -> VectorStore:
     """Return the configured vector store adapter.
 
-    ``dimensions`` must match the embedding model's output size. When not
-    supplied the store is created lazily on first ``upsert`` call.
+    If PINECONE_API_KEY and PINECONE_INDEX_NAME are configured in settings or env,
+    instantiates the live PineconeVectorStore.
+    Otherwise falls back to InMemoryVectorStore for offline unit testing.
     """
     global _DEFAULT_STORE
     if _DEFAULT_STORE is None:
+        from ..config import get_settings
+
+        cfg = get_settings()
+        if cfg.pinecone_api_key and cfg.pinecone_index_name:
+            from .pinecone import PineconeVectorStore
+
+            _DEFAULT_STORE = PineconeVectorStore()
+            return _DEFAULT_STORE
+
         if dimensions is None:
             raise ValueError(
                 "vector store dimensions must be supplied on first creation"

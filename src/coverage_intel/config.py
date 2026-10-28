@@ -9,22 +9,31 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 class Settings(BaseSettings):
     """Runtime settings, loaded from environment variables prefixed ``CI_``."""
 
     model_config = SettingsConfigDict(env_prefix="CI_", env_file=".env", extra="ignore")
 
     # ── Models ───────────────────────────────────────────────
-    llm_model: str = "gpt-4o-mini"
-    embedding_model: str = ""
-    llm_base_url: str | None = None
+    llm_model: str = os.getenv("XAI_GROK_MODEL", "gpt-4o-mini")
+    embedding_model: str = os.getenv("PINECONE_EMBED_MODEL", "multilingual-e5-large")
+    llm_base_url: str | None = os.getenv("XAI_GROK_BASE_URL", None)
     embedding_base_url: str | None = None
     rerank_model: str | None = None
 
-    llm_api_key: str = ""
+    llm_api_key: str = os.getenv("XAI_GROK_API_KEY", "")
     llm_timeout_seconds: float = 30.0
-    embedding_api_key: str = ""
+    embedding_api_key: str = os.getenv("PINECONE_API_KEY", "")
     upload_access_key: str = ""
+
+    pinecone_api_key: str = os.getenv("PINECONE_API_KEY", "")
+    pinecone_index_name: str = os.getenv("PINECONE_INDEX_NAME", "")
 
     # ── Ingestion (FR-04) ────────────────────────────────────
     chunk_size_tokens: int = 500
@@ -44,7 +53,7 @@ class Settings(BaseSettings):
     max_context_tokens: int = 6000
 
     # ── Storage & ops ───────────────────────────────────────
-    vector_store: str = "chroma"
+    vector_store: str = "pinecone" if os.getenv("PINECONE_INDEX_NAME") else "chroma"
     qdrant_url: str | None = None
     log_level: str = "INFO"
     log_format: str = "json"

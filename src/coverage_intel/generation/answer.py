@@ -47,6 +47,7 @@ class CoverageAnswer(BaseModel):
     question: str
     status: AnswerStatus
     summary: str
+    answer_text: str = ""
     statements: list[AnswerStatement] = []
     citations: list[Citation] = []
     warnings: list[Warning] = []
@@ -122,14 +123,54 @@ def generate(question: str, context: Context, query_id: str) -> CoverageAnswer:
             AnswerStatement(text=chunk.text, citation_indices=[idx])
         )
 
-    # Build summary from the most relevant evidence
+    # Synthesize grounded answer using the configured LLM (Groq / Grok)
     summary = context.blocks[0].chunk.text
+    try:
+        from ..config import get_settings
+        from .llm import ChatMessage, OpenAIChatClient
+
+        cfg = get_settings()
+        if cfg.llm_api_key and cfg.llm_model:
+            evidence_snippets = []
+            for idx, b in enumerate(context.blocks, 1):
+                sec = b.chunk.section or "Section I"
+                page = b.chunk.page or 1
+                evidence_snippets.append(f"[{idx}] Document: {b.chunk.document_id} | Section: {sec} | Page: {page}\n{b.chunk.text}")
+
+            context_str = "\n\n".join(evidence_snippets)
+            prompt = (
+                f"Question: {question}\n\n"
+                f"Authoritative Policy Context:\n{context_str}\n\n"
+                "Instructions:\n"
+                "1. Provide a professional, concise, direct answer to the adjuster's question.\n"
+                "2. State clearly whether the loss is COVERED, EXCLUDED, or CONDITIONAL upon specific policy requirements (such as heat maintenance, vacancy, or prompt notice).\n"
+                "3. Cite the relevant sections and peril/exclusion numbers explicitly.\n"
+                "4. Base your answer STRICTLY on the policy text above without external assumptions."
+            )
+            client = OpenAIChatClient(cfg)
+            completion = client.complete(
+                [
+                    ChatMessage(
+                        role="system",
+                        content="You are Coverage Intel, an enterprise AI assistant for insurance claims adjusters. Provide strictly grounded decision support citing policy language.",
+                    ),
+                    ChatMessage(role="user", content=prompt),
+                ],
+                temperature=0.1,
+                max_tokens=2048,
+            )
+            if completion.content and completion.content.strip():
+                summary = completion.content.strip()
+    except Exception as exc:
+        import logging
+        logging.getLogger("coverage-intel.answer").warning("LLM answer generation error: %s", exc)
 
     return CoverageAnswer(
         query_id=query_id,
         question=question,
         status=AnswerStatus.GROUNDED,
         summary=summary,
+        answer_text=summary,
         statements=statements,
         citations=citations,
         evidence=context.blocks,

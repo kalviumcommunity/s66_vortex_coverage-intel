@@ -6,25 +6,35 @@ Spec: specs/05-retrieval.md
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from ..ingestion.metadata import Chunk
 from ..vectorstore.index import ScoredChunk, VectorStore
 
 
 class Scenario(BaseModel):
-    """Applicability context supplied by the adjuster.
-
-    ``date_of_loss`` drives version resolution (US-04). When absent, version
-    applicability cannot be asserted and a warning is emitted — the system does
-    not assume "current version".
-    """
+    """Applicability context supplied by the adjuster."""
 
     policy_type: str | None = None
     date_of_loss: date | None = None
     jurisdiction: str | None = None
     claim_type: str | None = None
+
+    @field_validator("date_of_loss", mode="before")
+    @classmethod
+    def parse_empty_date(cls, v: Any) -> Any:
+        if v == "" or v is None:
+            return None
+        return v
+
+    @field_validator("policy_type", "jurisdiction", "claim_type", mode="before")
+    @classmethod
+    def parse_empty_strings(cls, v: Any) -> Any:
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
 
 class RetrievedEvidence(BaseModel):
@@ -65,7 +75,7 @@ def retrieve(
     question: str,
     k: int = 5,
     filters: object | None = None,
-    scenario: Scenario | None = None,
+    scenario: Scenario | dict[str, Any] | None = None,
 ) -> list[RetrievedEvidence]:
     """Retrieve the top-k chunks with similarity scores and metadata."""
     from ..embeddings.encoder import get_embedder
@@ -74,7 +84,6 @@ def retrieve(
     try:
         store = get_vector_store()
     except ValueError:
-        # Vector store not yet initialised (indexing not run yet)
         return []
     if store.count == 0:
         return []
@@ -88,10 +97,12 @@ def retrieve(
     if isinstance(filters, dict):
         filter_dict.update(filters)
     if scenario:
-        if scenario.jurisdiction:
-            filter_dict["jurisdiction"] = scenario.jurisdiction
-        if scenario.policy_type:
-            filter_dict["policy_type"] = scenario.policy_type
+        jurisdiction = getattr(scenario, "jurisdiction", None) or (scenario.get("jurisdiction") if isinstance(scenario, dict) else None)
+        policy_type = getattr(scenario, "policy_type", None) or (scenario.get("policy_type") if isinstance(scenario, dict) else None)
+        if jurisdiction:
+            filter_dict["jurisdiction"] = jurisdiction
+        if policy_type:
+            filter_dict["policy_type"] = policy_type
 
     results = store.search(query_vector, k=k, filters=filter_dict if filter_dict else None)
     return [

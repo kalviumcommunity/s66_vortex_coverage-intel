@@ -6,6 +6,10 @@
 venv/
 env/
 
+# Dependencies
+node_modules/
+frontend/node_modules/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -43,3 +47,6 @@ qdrant_storage/
 # Logs
 *.log
 logs/
+
+# Frontend Production Assets
+!frontend/dist/

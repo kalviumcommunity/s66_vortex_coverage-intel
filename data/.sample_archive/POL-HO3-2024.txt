@@ -1,0 +1,52 @@
+STATE MUTUAL PROPERTY & CASUALTY CO.
+POLICY FORM HO-2024 (ED. 01/24)
+HOMEOWNERS 3 — SPECIAL FORM COMPREHENSIVE POLICY
+POLICY IDENTIFIER: POL-HO3-2024
+VERSION: 2024.1
+EFFECTIVE DATE: 2024-01-01
+EXPIRATION DATE: 2025-12-31
+JURISDICTION: US-ALL
+
+AGREEMENT & DEFINITIONS
+We agree to provide the insurance described in this policy in return for the premium and compliance with all applicable policy provisions. Throughout this policy, 'you' and 'your' refer to the 'named insured' shown in the Declarations. 'We', 'us', and 'our' refer to the Company providing this insurance.
+
+SECTION I - PROPERTY COVERAGES
+COVERAGE A — DWELLING
+We cover:
+1. The dwelling on the 'residence premises' shown in the Declarations, including structures attached to the dwelling; and
+2. Materials and supplies located on or next to the 'residence premises' used to construct, alter or repair the dwelling or other structures on the 'residence premises'.
+
+COVERAGE B — OTHER STRUCTURES
+We cover other structures on the 'residence premises' set apart from the dwelling by clear space. This includes structures connected to the dwelling by only a fence, utility line, or similar connection.
+
+COVERAGE C — PERSONAL PROPERTY
+We cover personal property owned or used by an 'insured' while it is anywhere in the world.
+
+SECTION I - PERILS INSURED AGAINST
+We insure against sudden and accidental direct physical loss to property described in Coverages A and B, unless the loss is excluded in Section I — Exclusions.
+
+12. ACCIDENTAL DISCHARGE OR OVERFLOW OF WATER OR STEAM
+a. This peril means accidental discharge or overflow of water or steam from within a plumbing, heating, air conditioning or automatic fire protective sprinkler system or from within a household appliance.
+b. This peril does not include loss:
+(1) On the 'residence premises' caused by accidental discharge or overflow which occurs off the 'residence premises';
+(2) Caused by constant or repeated seepage or leakage of water or steam or the presence or condensation of humidity, moisture or vapor, over a period of weeks, months or years;
+(3) To a system or appliance from which the water or steam escaped;
+(4) Caused by or resulting from freezing except as provided in Peril 14. Freezing below.
+c. In this peril, a plumbing system or household appliance does not include a sump, sump pump or related equipment or a roof drain, gutter, downspout or similar fixtures or equipment.
+
+14. FREEZING OF PLUMBING AND APPLIANCES
+Freezing of a plumbing, heating, air conditioning or automatic fire protective sprinkler system or of a household appliance, but only if you have used reasonable care to:
+(a) Maintain heat in the building at or above 55 degrees Fahrenheit; or
+(b) Shut off the water supply and drain all systems and appliances of water.
+If the building has been vacant or unoccupied for more than 30 consecutive days prior to loss, heat maintenance records or utility statements are required to confirm compliance with the 55 degree Fahrenheit threshold.
+
+SECTION I - EXCLUSIONS
+1. Water Damage Exclusion
+We do not insure for loss caused directly or indirectly by any of the following, regardless of any other cause or event contributing concurrently or in any sequence to the loss:
+a. Flood, surface water, waves, tidal water, overflow of any body of water, or spray from any of these, whether or not driven by wind;
+b. Water or water-borne material which backs up through sewers or drains or which overflows or is discharged from a sump, sump pump or related equipment;
+c. Water or water-borne material below the surface of the ground, including water which exerts pressure on or seeps or leaks through a building, sidewalk, driveway, foundation, swimming pool or other structure.
+Direct loss by fire, explosion or theft resulting from water damage is covered.
+
+2. Neglect and Intentional Loss
+We do not cover loss resulting from neglect of the insured to use all reasonable means to save and preserve property at and after the time of a loss.

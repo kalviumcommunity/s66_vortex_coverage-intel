@@ -8,40 +8,15 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from pathlib import Path
 
-from coverage_intel.config import get_settings
-from coverage_intel.embeddings.encoder import get_embedder
-from coverage_intel.ingestion.chunking import chunk
-from coverage_intel.ingestion.validation import prepare_corpus
 from coverage_intel.pipeline.rag import answer_question
 from coverage_intel.retrieval.semantic import Scenario
-from coverage_intel.vectorstore.index import get_vector_store
+from coverage_intel.services.indexing_service import ensure_corpus_indexed
 
 
 def _ensure_corpus_indexed() -> None:
     """Ensure corpus is indexed in the vector store before answering."""
-    settings = get_settings()
-    corpus_path = Path(settings.corpus_dir)
-    if not corpus_path.exists():
-        return
-    files = [p for p in corpus_path.iterdir() if p.is_file() and not p.name.startswith(".")]
-    if not files:
-        return
-    docs, _ = prepare_corpus(files)
-    all_chunks = []
-    for doc in docs:
-        all_chunks.extend(chunk(doc.blocks))
-    if not all_chunks:
-        return
-    embedder = get_embedder(settings)
-    texts = [c.text for c in all_chunks]
-    vectors = embedder.embed_documents(texts)
-    dimensions = len(vectors[0]) if vectors else 0
-    store = get_vector_store(dimensions=dimensions)
-    if store.count > 0:
-        return
-    store.upsert(all_chunks, vectors)
+    ensure_corpus_indexed(force=True)
 
 
 def main() -> int:
