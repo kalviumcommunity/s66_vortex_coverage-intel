@@ -15,9 +15,13 @@ def _no_network(monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPa
     monkeypatch.setenv("CI_EMBEDDING_API_KEY", "test-key")
     test_corpus = tmp_path_factory.mktemp("test_corpus")
     monkeypatch.setenv("CI_CORPUS_DIR", str(test_corpus))
-    monkeypatch.delenv("PINECONE_INDEX_NAME", raising=False)
-    monkeypatch.delenv("PINECONE_API_KEY", raising=False)
+    monkeypatch.setenv("PINECONE_INDEX_NAME", "")
+    monkeypatch.setenv("PINECONE_API_KEY", "")
+
     from coverage_intel import config as ci_config
     ci_config._settings = None
+
     from coverage_intel.vectorstore import index as vs_index
-    vs_index._DEFAULT_STORE = None
+    from coverage_intel.vectorstore.memory import InMemoryVectorStore
+    from coverage_intel.vectorstore.schema import CollectionSpec
+    vs_index._DEFAULT_STORE = InMemoryVectorStore(CollectionSpec(name="coverage-intel", dimensions=1536))
