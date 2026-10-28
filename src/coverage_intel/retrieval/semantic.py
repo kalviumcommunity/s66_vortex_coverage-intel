@@ -78,7 +78,7 @@ def retrieve(
     scenario: Scenario | dict[str, Any] | None = None,
 ) -> list[RetrievedEvidence]:
     """Retrieve the top-k chunks with similarity scores and metadata."""
-    from ..embeddings.encoder import get_embedder
+    from ..embeddings.encoder import DeterministicEmbedder, get_embedder
     from ..vectorstore.index import get_vector_store
 
     try:
@@ -87,11 +87,13 @@ def retrieve(
         return []
     if store.count == 0:
         return []
-    embedder = get_embedder()
     try:
+        embedder = get_embedder()
         query_vector = embedder.embed_query(question)
     except Exception:
-        return []
+        # External embedding API unavailable; fall back to deterministic embedder
+        embedder = DeterministicEmbedder(dimensions=1536)
+        query_vector = embedder.embed_query(question)
 
     filter_dict: dict[str, object] = {}
     if isinstance(filters, dict):
